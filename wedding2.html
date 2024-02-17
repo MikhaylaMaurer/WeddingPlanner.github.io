@@ -1,0 +1,409 @@
+<!doctype html>
+
+<head>
+    <title>Wedding Planner</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" type="text/css" href="wedding2.css">
+    <link rel="icon" type="image/x-icon" href="favicon.ico">
+</head>
+
+<body style="background-color: rgb(30, 109, 83);background-image:url('background.jpg');">
+
+    <!-- <div class = "container">
+        <h2>Login</h2>
+        <form action="login.php" method="post">
+            <label for="username">Username:</label>
+            <input type="text" id="username" name="username" required>
+
+            <label for="password">Password:</label>
+            <input type="password" id="password" name="password" required>
+
+            <button type="submit">Login</button>
+
+        </form>
+    </div> -->
+
+    <header style="background-color: rgb(80, 153, 107);">
+        <h1>Welcome to your Wedding Planner!</h1>
+    </header>
+
+
+    <nav>
+        <h5 class="bar-item">Menu</h5>
+        <button class="bar-item button tablink" onclick="openTab(event, 'Home')" id="defaultOpen">Home</button>
+        <button class="bar-item button tablink" onclick="openTab(event, 'CheckList')">Check List</button>
+        <button class="bar-item button tablink" onclick="openTab(event, 'GuestList')">Guest List</button>
+        <button class="bar-item button tablink" onclick="openTab(event, 'Seating')">Seating</button>
+        <button class="bar-item button tablink" onclick="openTab(event, 'Timeline')">Day Of Timeline</button>
+        <button class="bar-item button tablink" onclick="openTab(event, 'Vendors')">Vendors</button>
+        <button class="bar-item button tablink" onclick="openTab(event, 'Budget')">Budget</button>
+        <button class="bar-item button tablink" onclick="openTab(event, 'Calendar')">Calendar</button>
+        <button class="bar-item button tablink" onclick="openTab(event, 'Music')">Playlist</button>
+        <button class="bar-item button tablink" onclick="openTab(event, 'MoodBoard')">Mood Board</button>
+    </nav>
+
+    <aside>
+        <div id="Home" class="tabcontent animate-opacity">
+            <h2>This is the home page!</h2>
+            <p>More will be added soon...</p>
+        </div>
+
+        <div id="CheckList" class="tabcontent animate-opacity">
+            <h2>Check List</h2>
+            <p>This is where you can check if you have missed any steps in the wedding planning process! </p>
+            <form>
+                <h3 class="subheader">12+ Months Before</h3>
+                <table>
+                    <tr>
+                        <td><input class="pop" type="checkbox" id="CB1" name="CB1" value="CB1">
+                            <label for="CB1">Decide on a Budget</label>
+                        </td>
+                        <td><input class="pop" type="checkbox" id="CB2" name="CB2" value="CB2">
+                            <label for="CB2">Draft a Guest List</label>
+                        </td>
+                        <td><input class="pop" type="checkbox" id="CB3" name="CB3" value="CB3">
+                            <label for="CB3">Research Reception and Ceremony Sites</label>
+                        </td>
+                        <td><input class="pop" type="checkbox" id="CB0" name="CB0" value="CB0">
+                            <label for="CB0">Throw an Engagement Party!</label>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td><input class="pop" type="checkbox" id="CB4" name="CB4" value="CB4">
+                            <label for="CB4">Set your Wedding Date</label>
+                        </td>
+                        <td><input class="pop" type="checkbox" id="CB5" name="CB5" value="CB5">
+                            <label for="CB5">Research Vendors</label>
+                        </td>
+                        <td><input class="pop" type="checkbox" id="CB6" name="CB6" value="CB6">
+                            <label for="CB6">Book your Venue(s)</label>
+                        </td>
+                        <td><input class="pop" type="checkbox" id="CB00" name="CB00" value="CB00">
+                            <label for="CB00">Pick Wedding Dress</label>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td><input class="pop" type="checkbox" id="CB4" name="CB4" value="CB4">
+                            <label for="CB4">Choose your Wedding Party</label>
+                        </td>
+                        <td><input class="pop" type="checkbox" id="CB5" name="CB5" value="CB5">
+                            <label for="CB5">Hire a Wedding Planner or Day-of-Coordinator</label>
+                        </td>
+                    </tr>
+                </table>
+                <br>
+                <h3 class="subheader">10-12 Months Before</h3>
+                <table>
+                    <tr>
+                        <td><input class="pop" type="checkbox" id="CB7" name="CB7" value="CB7">
+                            <label for="CB7">Book Hair and Makeup</label>
+                        </td>
+                        <td><input class="pop" type="checkbox" id="CB8" name="CB8" value="CB8">
+                            <label for="CB8">Book a Photographer and Videographer</label>
+                        </td>
+                        <td><input class="pop" type="checkbox" id="CB9" name="CB9" value="CB9">
+                            <label for="CB9">Book Caterer</label>
+                        </td>
+                        <td><input class="pop" type="checkbox" id="CB10" name="CB10" value="CB10">
+                            <label for="CB10">Book Florist</label>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td><input class="pop" type="checkbox" id="CB11" name="CB11" value="CB11">
+                            <label for="CB11">Book Event Rentals</label>
+                        </td>
+                        <td><input class="pop" type="checkbox" id="CB12" name="CB12" value="CB12">
+                            <label for="CB12">Book Decorator</label>
+                        </td>
+                        <td><input class="pop" type="checkbox" id="CB13" name="CB13" value="CB13">
+                            <label for="CB13">Pick an Officiant</label>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td><input class="pop" type="checkbox" id="CB16" name="CB16" value="CB16">
+                            <label for="CB16">Finalize Guest List</label>
+                        </td>
+                        <td><input class="pop" type="checkbox" id="CB15" name="CB15" value="CB15">
+                            <label for="CB15">Send Save the Dates</label>
+                        </td>
+                    </tr>
+                </table>
+                <br>
+                <h3 class="subheader">8-10 Months Before</h3>
+                <table>
+                    <tr>
+                        <td><input class="pop" type="checkbox" id="CB17" name="CB17" value="CB17">
+                            <label for="CB17">Book Band and/or DJ</label>
+                        </td>
+                        <td><input class="pop" type="checkbox" id="CB18" name="CB18" value="CB18">
+                            <label for="CB18">Do Cake Testing and Book Cake Baker</label>
+                        </td>
+                        <td><input class="pop" type="checkbox" id="CB19" name="CB19" value="CB19">
+                            <label for="CB19">Make a Registry</label>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td><input class="pop" type="checkbox" id="CB17" name="CB17" value="CB17">
+                            <label for="CB17">Plan Ceremony & Reception Decor</label>
+                        </td>
+                        <td><input class="pop" type="checkbox" id="CB18" name="CB18" value="CB18">
+                            <label for="CB18">Choose Music for Ceremony</label>
+                        </td>
+                        <td><input class="pop" type="checkbox" id="CB19" name="CB19" value="CB19">
+                            <label for="CB19">Decide on Bridesmaid Dresses</label>
+                        </td>
+                    </tr>
+                </table>
+                <br>
+                <h3 class="subheader">6-8 Months Before</h3>
+                <table>
+                    <tr>
+                        <td><input class="pop" type="checkbox" id="CB17" name="CB17" value="CB17">
+                            <label for="CB17">Purchase Wedding Bands</label>
+                        </td>
+                        <td><input class="pop" type="checkbox" id="CB18" name="CB18" value="CB18">
+                            <label for="CB18">Plan/Book Honeymoon</label>
+                        </td>
+                        <td><input class="pop" type="checkbox" id="CB19" name="CB19" value="CB19">
+                            <label for="CB19">Book Rehersal Dinner Venue</label>
+                        </td>
+                        <td><input class="pop" type="checkbox" id="CB19" name="CB19" value="CB19">
+                            <label for="CB19">Block out Hotel Rooms for Out of Town Guests</label>
+                        </td>
+                    </tr>
+                </table>
+                <br>
+                <h3 class="subheader">4-6 Months Before</h3>
+                <table>
+                    <tr>
+                        <td><input class="pop" type="checkbox" id="CB19" name="CB19" value="CB19">
+                            <label for="CB19">Decide on Groomsmen Attire</label>
+                        </td>
+                        <td><input class="pop" type="checkbox" id="CB19" name="CB19" value="CB19">
+                            <label for="CB19">Send Out Wedding Invitations</label>
+                        </td>
+                        <td><input class="pop" type="checkbox" id="CB19" name="CB19" value="CB19">
+                            <label for="CB19">Order Wedding Favors</label>
+                        </td>
+                        <td><input class="pop" type="checkbox" id="CB19" name="CB19" value="CB19">
+                            <label for="CB19">Schedule Dance Lessons, if required</label>
+                        </td>
+                    </tr>
+                </table>
+                <br>
+                <h3 class="subheader">2-4 Months Before</h3>
+                <table>
+                    <tr>
+                        <td><input class="pop" type="checkbox" id="CB19" name="CB19" value="CB19">
+                            <label for="CB19">Hair and Makeup Trial</label>
+                        </td> 
+                        <td><input class="pop" type="checkbox" id="CB19" name="CB19" value="CB19">
+                            <label for="CB19">Apply for Marriage License</label>
+                        </td> 
+                        <td><input class="pop" type="checkbox" id="CB19" name="CB19" value="CB19">
+                            <label for="CB19">Finalize Menu with Caterer</label>
+                        </td> 
+                        <td><input class="pop" type="checkbox" id="CB19" name="CB19" value="CB19">
+                            <label for="CB19">Finalize Wedding Decor</label>
+                        </td> 
+                        
+                    </tr>
+                    <tr>
+                        <td><input class="pop" type="checkbox" id="CB19" name="CB19" value="CB19">
+                            <label for="CB19">Finalize Wedding Cake Details</label>
+                        </td> 
+                        <td><input class="pop" type="checkbox" id="CB19" name="CB19" value="CB19">
+                            <label for="CB19">Finalize Floral Arrangements</label>
+                        </td> 
+                        <td><input class="pop" type="checkbox" id="CB19" name="CB19" value="CB19">
+                            <label for="CB19">Purcahse Day Of Accessories</label>
+                        </td> 
+                        <td><input class="pop" type="checkbox" id="CB19" name="CB19" value="CB19">
+                            <label for="CB19">Final Dress Fitting and Alterations</label>
+                        </td>
+                    </tr>
+                </table>
+                <br>
+                <h3 class="subheader">1-2 Weeks Before</h3>
+                <table>
+                    <tr>
+                        <td><input class="pop" type="checkbox" id="CB19" name="CB19" value="CB19">
+                            <label for="CB19">Pay Outstanding Balances to Vendors</label>
+                        </td>
+                        <td><input class="pop" type="checkbox" id="CB19" name="CB19" value="CB19">
+                            <label for="CB19">Write your Wedding Vows</label>
+                        </td>
+                        <td><input class="pop" type="checkbox" id="CB19" name="CB19" value="CB19">
+                            <label for="CB19">Make Final Seating Chart</label>
+                        </td>
+                        <td><input class="pop" type="checkbox" id="CB19" name="CB19" value="CB19">
+                            <label for="CB19">Pick up your Wedding Rings</label>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td><input class="pop" type="checkbox" id="CB19" name="CB19" value="CB19">
+                            <label for="CB19">Follow up with Guests who haven't RSVP'd</label>
+                        </td>
+                        <td><input class="pop" type="checkbox" id="CB19" name="CB19" value="CB19">
+                            <label for="CB19">Inform Venue of Final Guest Count</label>
+                        </td>
+                        <td><input class="pop" type="checkbox" id="CB19" name="CB19" value="CB19">
+                            <label for="CB19">Finalize Shot List With Photographer</label>
+                        </td>
+                        <td><input class="pop" type="checkbox" id="CB19" name="CB19" value="CB19">
+                            <label for="CB19">Arrange Transportation from Reception</label>
+                        </td>
+                    </tr>
+                </table>
+                <br>
+                <h3 class="subheader">1-2 Days Before</h3>
+                <table>
+                    <tr>
+                        <td><input class="pop" type="checkbox" id="CB19" name="CB19" value="CB19">
+                            <label for="CB19">Get Manicure and Pedicure</label>
+                        </td>
+                        <td><input class="pop" type="checkbox" id="CB19" name="CB19" value="CB19">
+                            <label for="CB19">Attend Rehersal</label>
+                        </td>
+                        <td><input class="pop" type="checkbox" id="CB19" name="CB19" value="CB19">
+                            <label for="CB19">Confirm Transport for After Reception</label>
+                        </td>
+                        <td><input class="pop" type="checkbox" id="CB19" name="CB19" value="CB19">
+                            <label for="CB19">Pack for and Confirm Honeymoon Reservations</label>
+                        </td>
+                    </tr>
+                </table>
+                <br>
+                <h3 class="subheader">Morning Of</h3>
+                <table>
+                    <tr>
+                        <td><input class="pop" type="checkbox" id="CB19" name="CB19" value="CB19">
+                            <label for="CB19">Eat a Healthy Breakfast</label>
+                        </td>
+                        <td><input class="pop" type="checkbox" id="CB19" name="CB19" value="CB19">
+                            <label for="CB19">Pack your Emergency Kit</label>
+                        </td>
+                        <td><input class="pop" type="checkbox" id="CB19" name="CB19" value="CB19">
+                            <label for="CB19">Get your Hair and Makeup Done</label>
+                        </td>
+                    </tr>
+                </table>
+            </form>
+        </div>
+
+        <div id="GuestList" class="tabcontent animate-opacity">
+            <h2>Guest List</h2>
+            <p>This is where you can edit and view your guest list!</p>
+            <input type='text' id='name' />
+            <input type='button' value='Add to List' id='add' onclick="document.getElementById('name').value=''" />
+            <ol id="list_item"></ol>
+            <input type='text' id='removename' />
+            <input type='button' value='Remove From List' id='remove' />
+        </div>
+
+        <div id="Seating" class="tabcontent animate-opacity">
+            <h2>Seating</h2>
+            <p>This is where you can edit and view your seating chart! </p>
+        </div>
+
+        <div id="Timeline" class="tabcontent animate-opacity">
+            <h2>Day Of Timeline</h2>
+            <p>Make your day of timeline! </p>
+        </div>
+
+        <div id="Vendors" class="tabcontent animate-opacity">
+            <h2>Vendor List</h2>
+            <p>This is where you can edit and view your vendor information! <br>
+                Save your vendor information with the button at the bottom of the page.
+            </p>
+
+            <h3>Photographer &#128248</h3>
+            <h4>Name: <input type="text" id="name" /></h4>
+            <h4>Phone Number: <input type="text" id="number" /></h4>
+            <h4>E-Mail: <input type="email" id="email" /></h4>
+            <br>
+            <h3>Videographer &#127909</h3>
+            <h4>Name: <input type="text" id="name" /></h4>
+            <h4>Phone Number: <input type="text" id="number" /></h4>
+            <h4>E-Mail: <input type="email" id="email" /></h4>
+            <br>
+            <h3>Caterer &#127837</h3>
+            <h4>Name: <input type="text" id="name" /></h4>
+            <h4>Phone Number: <input type="text" id="number" /></h4>
+            <h4>E-Mail: <input type="email" id="email" /></h4>
+            <br>
+            <h3>Dessert &#127856</h3>
+            <h4>Name: <input type="text" id="name" /></h4>
+            <h4>Phone Number: <input type="text" id="number" /></h4>
+            <h4>E-Mail: <input type="email" id="email" /></h4>
+            <br>
+            <h3>Bar &#129346 &#127865</h3>
+            <h4>Name: <input type="text" id="name" /></h4>
+            <h4>Phone Number: <input type="text" id="number" /></h4>
+            <h4>E-Mail: <input type="email" id="email" /></h4>
+            <br>
+            <h3>Decorator &#127882</h3>
+            <h4>Name: <input type="text" id="name" /></h4>
+            <h4>Phone Number: <input type="text" id="number" /></h4>
+            <h4>E-Mail: <input type="email" id="email" /></h4>
+            <br>
+            <h3>Florist &#128144</h3>
+            <h4>Name: <input type="text" id="name" /></h4>
+            <h4>Phone Number: <input type="text" id="number" /></h4>
+            <h4>E-Mail: <input type="email" id="email" /></h4>
+            <br>
+            <input style="margin-left: 35%" type="button" value="Save Vendor Information" id="save" />
+
+        </div>
+
+        <div id="Budget" class="tabcontent animate-opacity">
+            <h2>Budget</h2>
+            <p>This is where you can edit and view your budget! </p>
+        </div>
+
+        <div id="Calendar" class="tabcontent animate-opacity">
+            <h2>Calendar</h2>
+            <p>This is where you can edit and view your calendar! </p>
+        </div>
+
+        <div id="Music" class="tabcontent animate-opacity">
+            <h2>Day Of Playlist</h2>
+            <p>This is where you can select the songs you want on your big day! </p>
+        </div>
+
+        <div id="MoodBoard" class="tabcontent animate-opacity">
+            <h2>Mood Board</h2>
+        </div>
+    </aside>
+
+    <script>
+        function openTab(evt, tabName) {
+            var i, tabcontent, tablinks;
+            tabcontent = document.getElementsByClassName("tabcontent");
+            for (i = 0; i < tabcontent.length; i++) {
+                tabcontent[i].style.display = "none";
+            }
+
+            tablinks = document.getElementsByClassName("tablink");
+            for (i = 0; i < tablinks.length; i++) {
+                tablinks[i].className = tablinks[i].className.replace(" active", "");
+            }
+            document.getElementById(tabName).style.display = "block";
+            evt.currentTarget.className += " active";
+        }
+    </script>
+
+    <script>
+        document.getElementById("add").onclick = function () {
+            var node = document.createElement("Li");
+            var text = document.getElementById("name").value;
+            var textnode = document.createTextNode(text);
+            node.appendChild(textnode);
+            document.getElementById("list_item").appendChild(node);
+        }
+
+    </script>
+</body>
+
+</html>
