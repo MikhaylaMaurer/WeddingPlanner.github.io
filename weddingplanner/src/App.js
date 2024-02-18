@@ -47,6 +47,7 @@ function Sidebar({ onTabChange }) {
   );
 }
 
+// Everyone
 function HomeContent() {
   return (
     <div className="tabcontent">
@@ -56,22 +57,27 @@ function HomeContent() {
   );
 }
 
+// Mikhayla
 function ChecklistContent() {
   return <div className="tabcontent"></div>;
 }
 
+// Mikhayla
 function GuestlistContent() {
   return <div className="tabcontent"></div>;
 }
 
+// Ahana
 function SeatingContent() {
   return <div className="tabcontent"></div>;
 }
 
+// Shaylee
 function DayOfContent() {
   return <div className="tabcontent"></div>;
 }
 
+// Mikhayla
 function VendorContent() {
   const vendors = [
     { title: "Photographer", emoji: "📷" },
@@ -113,18 +119,22 @@ function Vendor({title, emoji}){
   );
 }
 
+// Ahana
 function BudgetContent() {
   return <div className="tabcontent"></div>;
 }
 
+// Ahana
 function CalendarContent() {
   return <div className="tabcontent"></div>;
 }
 
+// Shaylee
 function PlaylistContent() {
   return <div className="tabcontent"></div>;
 }
 
+// Shaylee
 function MoodBoardContent() {
   return <div className="tabcontent"></div>;
 }
