@@ -73,7 +73,44 @@ function DayOfContent() {
 }
 
 function VendorContent() {
-  return <div className="tabcontent"></div>;
+  const vendors = [
+    { title: "Photographer", emoji: "📷" },
+    { title: "Videographer", emoji: "🎥" },
+    { title: "Caterer", emoji: "🍽️" },
+    { title: "Dessert", emoji: "🍰" },
+    { title: "Bar", emoji: "🍹" },
+    { title: "Decorator", emoji: "🎨" },
+    { title: "Florist", emoji: "💐" }
+  ];
+  return (
+    <div className="tabcontent">
+
+      <h2>Vendor List</h2>
+      <p>
+        This is where you can edit and view your vendor information!
+        <br />
+        Save your vendor information with the button at the bottom of the page.
+      </p>
+
+      {vendors.map((vendor, index) => (
+        <Vendor key={index} title={vendor.title} emoji={vendor.emoji}/>
+      ))}
+      <input style={{marginLeft: '35%'}} type="button" value="Save Vendor Information" id="save"/>
+      
+    </div>
+  );
+}
+
+function Vendor({title, emoji}){
+  return(
+    <>
+      <h3>{title} {emoji}</h3>
+      <h4>Name: <input type="text" id={`${title.toLowerCase()}_name`} /></h4>
+      <h4>Phone Number: <input type="text" id={`${title.toLowerCase()}_number`} /></h4>
+      <h4>E-Mail: <input type="email" id={`${title.toLowerCase()}_email`} /></h4>
+      <br />
+    </>
+  );
 }
 
 function BudgetContent() {
