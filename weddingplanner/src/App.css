@@ -198,3 +198,424 @@ td {
   color: rgb(91, 14, 45);
   text-align: left;
 }
+
+.calendar-container {
+  font-family: Georgia, 'Times New Roman', Times, serif;
+  color: rgb(149, 23, 73);
+  padding: 20px;
+  background-color: rgba(250, 241, 230, 0.732);
+  border-radius: 8px;
+  max-width: 600px; /* Set a max-width for the calendar */
+  margin: auto; /* Center the calendar on the page */
+}
+
+.controls {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.controls input[type="text"] {
+  flex-grow: 1; /* Allow input to grow */
+  margin-right: 10px;
+  padding: 5px;
+}
+
+.controls select,
+.controls button {
+  padding: 5px;
+  margin-right: 10px;
+}
+
+.controls button {
+  background-color: rgb(198, 43, 105);
+  color: white;
+  border: none;
+  cursor: pointer;
+}
+
+.legend {
+  margin-bottom: 20px;
+}
+
+.legend-item {
+  display: flex;
+  align-items: center;
+  margin-bottom: 5px;
+}
+
+.color-box {
+  width: 20px;
+  height: 20px;
+  display: inline-block;
+  margin-right: 10px;
+}
+
+.month-container {
+  margin-bottom: 20px;
+}
+
+.month-container h3 {
+  text-align: center;
+  margin-bottom: 10px;
+  font-size: 25px;
+  text-decoration: underline;
+  text-decoration-style: wavy;
+  text-decoration-color: rgb(230, 148, 196);
+}
+
+.days-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 5px;
+}
+
+.day {
+  padding: 10px;
+  text-align: center;
+  background-color: #fff;
+  border: 1px solid #ddd;
+  cursor: pointer;
+  position: relative; /* Position relative for absolute child elements */
+}
+
+.day:hover {
+  background-color: #f0f0f0;
+}
+
+.event-day {
+  background-color: #ffecd1;
+}
+
+.remove-event {
+  position: absolute;
+  top: 2px;
+  right: 2px;
+  background-color: #ff0000;
+  color: white;
+  border: none;
+  padding: 2px 5px;
+  cursor: pointer;
+  display: none; /* Initially hide the remove button */
+}
+
+.day:hover .remove-event {
+  display: block; /* Show remove button on day hover */
+}
+
+.color-selector {
+  position: relative;
+  display: inline-block;
+  cursor: pointer;
+}
+
+.selected-color {
+  width: 20px;
+  height: 20px;
+  border: 1px solid #ddd;
+}
+
+.color-options {
+  display: none; /* Initially hide color options */
+  position: absolute;
+  top: 100%;
+  left: 0;
+  z-index: 1000;
+  background-color: #fff;
+  border: 1px solid #ddd;
+}
+
+.color-selector:hover .color-options {
+  display: flex; /* Show color options on hover */
+  flex-direction: column;
+}
+
+.color-option {
+  width: 20px;
+  height: 20px;
+  cursor: pointer;
+}
+
+@media (max-width: 768px) {
+  .calendar-container {
+    padding: 10px;
+  }
+
+  .controls {
+    flex-direction: column;
+  }
+
+  .controls input[type="text"],
+  .controls select,
+  .controls button {
+    width: 100%;
+    margin: 5px 0; /* Add space between controls */
+  }
+
+  .days-grid {
+    grid-template-columns: repeat(7, 1fr);
+  }
+
+  .day {
+    padding: 5px;
+  }
+}
+
+@media (max-width: 480px) {
+  .controls {
+    display: block;
+  }
+
+  .color-options {
+    flex-direction: row; /* Color options in a row for small screens */
+    flex-wrap: wrap;
+  }
+}
+
+* {
+  padding: 0;
+  margin: 0;
+  box-sizing: border-box;
+}
+
+.animate-opacity {
+  animation: opac 0.8s;
+}
+
+@keyframes opac {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+/* General styles */
+.budget-container {
+  font-family: Georgia, 'Times New Roman', Times, serif;
+  max-width: 800px;
+  margin: auto;
+  padding: 20px;
+  background-color: rgba(250, 241, 230, 0.732);
+  animation: opac 0.8s; 
+}
+
+/* Style for the main title */
+.budget-container h1 {
+  color: rgb(149, 23, 73); 
+  text-align: center;
+  font-size: 45px;
+  margin-bottom: 30px;
+}
+
+.budget-category h2 {
+  background-color: rgb(219, 152, 179); 
+  color: rgb(198, 43, 105); 
+  padding: 8px 16px; 
+  font-size: 25px;
+  text-align: left; 
+  border-bottom: 2px solid #ccc; 
+}
+
+.budget-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 16px; 
+  
+}
+
+.budget-item-name, .budget-item-input {
+  flex: 1;
+  color: rgb(149, 23, 73); 
+  font-size: 18px; 
+}
+
+.budget-item-name {
+  margin-right: 10px; 
+}
+
+.budget-item input[type="number"] {
+  padding: 5px;
+  margin: 0 5px;
+  border: 1px solid rgb(149, 23, 73); 
+  border-radius: 4px;
+  background-color: rgb(228, 204, 214); 
+  color: rgb(149, 23, 73); 
+}
+
+.budget-summary {
+  margin-top: 30px;
+  background-color: rgb(228, 204,214); 
+  padding: 10px;
+  border-top: 3px solid rgb(149, 23, 73); 
+  }
+  
+  .budget-summary div {
+  font-size: 20px;
+  color: rgb(149, 23, 73);
+  margin-bottom: 10px;
+  }
+  
+  
+  .button {
+  padding: 8px 16px;
+  font-size: 20px;
+  background-color: rgb(219, 152, 179);
+  color: rgb(198, 43, 105);
+  text-align: center;
+  cursor: pointer;
+  border: none;
+  display: block;
+  width: 100%;
+  }
+  
+  .button:hover {
+  background-color: rgb(198, 43, 105);
+  color: white;
+  }
+  
+  .budget-header {
+  display: flex;
+  justify-content: space-between;
+  padding: 8px 16px;
+  background-color: #f0f0f0;
+  border-bottom: 2px solid #ccc;
+  }
+  
+  .budget-header-name,
+  .budget-header-budgeted,
+  .budget-header-actual {
+  flex: 1;
+  font-weight: bold;
+  color: rgb(149, 23, 73); 
+  text-align: center;
+  }
+
+  .budget-item label {
+  display: none; 
+  }
+  
+  .budget-item input[type="number"] {
+  flex: 1; 
+  margin: 0 5px;
+  padding: 5px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  background-color: #fff;
+  color: #000; 
+  }
+  
+
+  @media (max-width: 768px) {
+  .budget-item {
+  flex-direction: column;
+  align-items: flex-start;
+  }
+  
+  .budget-item-name, .budget-item-input {
+  flex: none; 
+  width: 100%; 
+  margin-bottom: 5px; 
+  }
+  
+  .budget-header-name,
+  .budget-header-budgeted,
+  .budget-header-actual {
+  text-align: left; 
+  }
+}
+
+/* Style the form to match the button styling you provided */
+form {
+  background-color: rgba(250, 241, 230, 0.732); /* A light background for the form */
+  padding: 16px;
+  border-radius: 8px; /* Rounded corners for the form */
+  margin: 20px auto; /* Center the form with auto margins */
+  width: 80%; /* Match the width of your other content */
+}
+
+/* Input fields styled to match your aesthetic */
+form input[type="time"], form input[type="text"] {
+  font-family: 'Georgia', serif;
+  margin: 5px;
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  width: calc(100% - 22px); /* Full width minus padding and border */
+}
+
+/* Button styling */
+form button {
+  background-color: #C62B69; /* A color from your provided styles */
+  color: white;
+  padding: 8px 16px;
+  font-family: 'Georgia', 'Times New Roman', Times, serif;
+  font-size: 20px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.3s; /* Smooth transition for hover effect */
+}
+
+/* Button hover effect */
+form button:hover {
+  background-color: #A01E56; /* A darker shade for the hover state */
+}
+
+/* Event list styling */
+ul {
+  list-style: none;
+  padding: 0;
+  margin: 20px auto;
+  width: 80%; /* Match the width of your form */
+}
+
+/* Individual event styling */
+ul li {
+  background-color: rgba(250, 241, 230, 0.732); /* Using the same background as the form for consistency */
+  padding: 10px;
+  margin-bottom: 10px;
+  border-radius: 4px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* You can adjust the shadow to be more subtle if desired */
+}
+
+/* Time styling to match your aesthetic */
+ul li span:first-child {
+  font-weight: bold;
+  color: #953174; /* A common color used in your provided styles for headers */
+}
+
+/* Description styling */
+ul li span:last-child {
+  margin-left: 20px;
+}
+
+/* Additional styles from your snippet, adapted for the timeline */
+.animate-opacity {
+  animation: opac 0.8s;
+}
+
+@keyframes opac {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+.remove-button {
+  background-color: #953174; /* Match the theme's button color */
+  color: white;
+  border: none;
+  padding: 5px 10px;
+  margin-left: 10px;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.remove-button:hover {
+  background-color: #6f2c52; /* Darker shade for hover effect */
+}
+
+.event-item {
+  /* ... existing styles ... */
+  align-items: center; /* Ensure vertical alignment with the remove button */
+}
