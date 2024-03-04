@@ -47,7 +47,6 @@ function Sidebar({ onTabChange }) {
   );
 }
 
-// Everyone
 function HomeContent() {
   return (
     <div className="tabcontent">
@@ -57,27 +56,332 @@ function HomeContent() {
   );
 }
 
-// Mikhayla
+const checklistData = {
+  MB12: [
+    "Decide on a budget",
+    "Draft a guest list",
+    "Research reception and ceremony sites",
+    "Throw an Engagement Party",
+    "Set your Wedding Date",
+    "Research vendors",
+    "Book Venue(s)",
+    "Pick wedding dress",
+    "Hire wedding planner or day-of-coordinator",
+  ],
+  MB10: [
+    "Choose your Wedding party",
+    "Book hair and makeup",
+    "Book photographer",
+    "Book videographer",
+    "Book event rentals",
+    "Book decorator",
+    "Hire an officiant",
+    "Book florist",
+    "Finalize guest list",
+    "Send save the dates",
+  ],
+  MB8: [
+    "Book band/DJ",
+    "Go cake tasting",
+    "Book desserts",
+    "Make a registry",
+    "Plan ceremony and reception decor",
+    "Choose music for ceremony",
+    "Decide on bridesmaid dresses",
+  ],
+  MB6: [
+    "Purchase wedding bands",
+    "Plan/book honeymoon",
+    "Book rehersal dinner venue",
+    "Book hotel block for out of town guests",
+  ],
+  MB4: [
+    "Decide on groomsmen attire",
+    "Send out wedding invitations",
+    "Order wedding favors",
+    "Schedule dance lessons",
+  ],
+  MB2: [
+    "Hair and makeup trial",
+    "Apply for marriage license",
+    "Finalize menu with caterer",
+    "Finalize wedding decor",
+    "Finalize wedding cake details",
+    "Finalize floral arrangements",
+    "Purchase day of accessories",
+    "Final dress fitting and alterations",
+  ],
+  WB1: [
+    "Pay outstanding balances to vendors",
+    "Write your wedding vows",
+    "Make final seating chart",
+    "Pick up your wedding rings",
+    "Follow up with guests who have not sent RSVP",
+    "Inform venue of final guest count",
+    "Finalize shot list with photographer",
+    "Arrange transportation from reception",
+  ],
+  DB: [
+    "Get manicure and pedicure",
+    "Attend Rehersal",
+    "Confirm transport for after reception",
+    "Pack for and confirm honeymoon reservations",
+  ],
+  MO: [
+    "Eat a healthy breakfast",
+    "Pack your emergency kit",
+    "Get hair and makeup done",
+  ],
+};
+
+const categories = [
+  { title: "12+ Months Before", name: "MB12" },
+  { title: "10-12 Months Before", name: "MB10" },
+  { title: "8-10 Months Before", name: "MB8" },
+  { title: "6-8 Months Before", name: "MB6" },
+  { title: "4-6 Months Before", name: "MB4" },
+  { title: "2-4 Months Before", name: "MB2" },
+  { title: "1-2 Weeks Before", name: "WB1" },
+  { title: "Day Before", name: "DB" },
+  { title: "Morning Of", name: "MO" },
+];
+
 function ChecklistContent() {
-  return <div className="tabcontent"></div>;
+  const [checkedItems, setCheckedItems] = useState({});
+
+  const handleCheckboxChange = (category, item) => {
+    setCheckedItems({
+      ...checkedItems,
+      [category]: {
+        ...checkedItems[category],
+        [item]: !checkedItems[category]?.[item],
+      },
+    });
+  };
+
+  return (
+    <div className="tabcontent">
+      <div className="container">
+        <h2>Check List</h2>
+        {categories.map(({ title, name }) => (
+          <div key={name} className="check-container">
+            <h3>{title}</h3>
+            {checklistData[name].map((item) => (
+              <div key={item}>
+                <label>
+                  <input
+                    type="checkbox"
+                    checked={checkedItems[name]?.[item] || false}
+                    onChange={() => handleCheckboxChange(name, item)}
+                  />
+                  {item}
+                </label>
+              </div>
+            ))}
+          </div>
+        ))}
+      </div>
+    </div>
+  );
 }
 
-// Mikhayla
 function GuestlistContent() {
-  return <div className="tabcontent"></div>;
+  const [guests, setGuests] = useState([]);
+  const [inputName, setInputName] = useState("");
+  const [inputPhoneNumber, setInputPhoneNumber] = useState("");
+  const [inputAddress, setInputAddress] = useState("");
+  const [inputMealPreference, setInputMealPreference] = useState("");
+  const [inputRSVP, setInputRSVP] = useState(false);
+  const [editIndex, setEditIndex] = useState(null);
+
+  const handleNameChange = (e) => {
+    setInputName(e.target.value);
+  };
+
+  const handlePhoneNumberChange = (e) => {
+    setInputPhoneNumber(e.target.value);
+  };
+
+  const handleAddressChange = (e) => {
+    setInputAddress(e.target.value);
+  };
+
+  const handleMealPreferenceChange = (e) => {
+    setInputMealPreference(e.target.value);
+  };
+
+  const handleRSVPChange = (e) => {
+    setInputRSVP(e.target.checked);
+  };
+
+  const handleAddGuest = () => {
+    if (inputName.trim() !== "") {
+      const newGuest = {
+        name: inputName,
+        phoneNumber: inputPhoneNumber,
+        address: inputAddress,
+        mealPreference: inputMealPreference,
+        rsvp: inputRSVP,
+      };
+      setGuests([...guests, newGuest]);
+      setInputName("");
+      setInputPhoneNumber("");
+      setInputAddress("");
+      setInputMealPreference("");
+      setInputRSVP(false);
+    }
+  };
+
+  const handleRemoveGuest = (index) => {
+    const updatedGuests = [...guests];
+    updatedGuests.splice(index, 1);
+    setGuests(updatedGuests);
+  };
+
+  const handleEditRSVP = (index) => {
+    setEditIndex(index);
+    setInputRSVP(guests[index].rsvp);
+  };
+
+  const handleSaveRSVP = () => {
+    const updatedGuests = [...guests];
+    updatedGuests[editIndex].rsvp = inputRSVP;
+    setGuests(updatedGuests);
+    setEditIndex(null);
+  };
+
+  return (
+    <div className="tabcontent">
+      <h2>Guest List</h2>
+      <div className="enter-info">
+        <div className="input-container">
+          <input
+            type="text"
+            value={inputName}
+            onChange={handleNameChange}
+            placeholder="Name"
+          />
+          <input
+            type="text"
+            value={inputPhoneNumber}
+            onChange={handlePhoneNumberChange}
+            placeholder="Phone Number"
+          />
+          <input
+            type="text"
+            value={inputAddress}
+            onChange={handleAddressChange}
+            placeholder="Address"
+          />
+          <input
+            type="text"
+            value={inputMealPreference}
+            onChange={handleMealPreferenceChange}
+            placeholder="Meal Preference"
+          />
+          <label>
+            RSVP:
+            <input
+              type="checkbox"
+              checked={inputRSVP}
+              onChange={handleRSVPChange}
+            />
+          </label>
+        </div>
+        <div className="button-container">
+          {editIndex !== null ? (
+            <button onClick={handleSaveRSVP}>Save RSVP</button>
+          ) : (
+            <button onClick={handleAddGuest}>Add Guest</button>
+          )}
+        </div>
+      </div>
+      <div className="list">
+        <ul>
+          {guests.map((guest, index) => (
+            <li key={index}>
+              {guest.name} - {guest.phoneNumber} - {guest.address} -{" "}
+              {guest.mealPreference} - {guest.rsvp ? "RSVP'd" : "Not RSVP'd"}
+              <button onClick={() => handleRemoveGuest(index)}>
+                Remove Guest
+              </button>
+              {!editIndex && (
+                <button onClick={() => handleEditRSVP(index)}>Edit RSVP</button>
+              )}
+            </li>
+          ))}
+        </ul>
+      </div>
+    </div>
+  );
 }
 
-// Ahana
 function SeatingContent() {
   return <div className="tabcontent"></div>;
 }
 
-// Shaylee
 function DayOfContent() {
-  return <div className="tabcontent"></div>;
+  const [events, setEvents] = useState([]);
+  const [newEvent, setNewEvent] = useState({ time: "", description: "" });
+
+  const addEvent = (event) => {
+    event.preventDefault();
+    const sortedEvents = [...events, newEvent].sort((a, b) =>
+      a.time.localeCompare(b.time)
+    );
+    setEvents(sortedEvents);
+    setNewEvent({ time: "", description: "" }); // Reset the input fields
+  };
+
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
+    setNewEvent({ ...newEvent, [name]: value });
+  };
+
+  const removeEvent = (indexToRemove) => {
+    setEvents(events.filter((_, index) => index !== indexToRemove));
+  };
+
+  return (
+    <div className="tabcontent">
+      <div className="timeline-container">
+        <h2>Wedding Day Timeline</h2>
+        <form onSubmit={addEvent}>
+          <input
+            type="time"
+            name="time"
+            value={newEvent.time}
+            onChange={handleInputChange}
+            requried
+          />
+          <input
+            type="text"
+            name="description"
+            value={newEvent.description}
+            onChange={handleInputChange}
+            placeholder="Enter event description"
+            required
+          />
+          <button type="submit">Add Event</button>
+        </form>
+        <ul>
+          {events.map((event, index) => (
+            <li key={index} className="event-item">
+              <span>{event.time}</span> - <span>{event.description}</span>
+              <button
+                onClick={() => removeEvent(index)}
+                clannName="remove-button"
+              >
+                Remove
+              </button>
+            </li>
+          ))}
+        </ul>
+      </div>
+    </div>
+  );
 }
 
-// Mikhayla
 function VendorContent() {
   const vendors = [
     { title: "Photographer", emoji: "📷" },
@@ -86,11 +390,10 @@ function VendorContent() {
     { title: "Dessert", emoji: "🍰" },
     { title: "Bar", emoji: "🍹" },
     { title: "Decorator", emoji: "🎨" },
-    { title: "Florist", emoji: "💐" }
+    { title: "Florist", emoji: "💐" },
   ];
   return (
     <div className="tabcontent">
-
       <h2>Vendor List</h2>
       <p>
         This is where you can edit and view your vendor information!
@@ -99,27 +402,38 @@ function VendorContent() {
       </p>
 
       {vendors.map((vendor, index) => (
-        <Vendor key={index} title={vendor.title} emoji={vendor.emoji}/>
+        <Vendor key={index} title={vendor.title} emoji={vendor.emoji} />
       ))}
-      <input style={{marginLeft: '35%'}} type="button" value="Save Vendor Information" id="save"/>
-      
+      <input
+        style={{ marginLeft: "35%" }}
+        type="button"
+        value="Save Vendor Information"
+        id="save"
+      />
     </div>
   );
 }
 
-function Vendor({title, emoji}){
-  return(
+function Vendor({ title, emoji }) {
+  return (
     <>
-      <h3>{title} {emoji}</h3>
-      <h4>Name: <input type="text" id={`${title.toLowerCase()}_name`} /></h4>
-      <h4>Phone Number: <input type="text" id={`${title.toLowerCase()}_number`} /></h4>
-      <h4>E-Mail: <input type="email" id={`${title.toLowerCase()}_email`} /></h4>
+      <h3>
+        {title} {emoji}
+      </h3>
+      <h4>
+        Name: <input type="text" id={`${title.toLowerCase()}_name`} />
+      </h4>
+      <h4>
+        Phone Number: <input type="text" id={`${title.toLowerCase()}_number`} />
+      </h4>
+      <h4>
+        E-Mail: <input type="email" id={`${title.toLowerCase()}_email`} />
+      </h4>
       <br />
     </>
   );
 }
 
-// Ahana
 function BudgetContent() {
   const categories = {
     "Invites/Stationary": [
@@ -258,7 +572,6 @@ const BudgetCategory = ({ category, items, onValueChange }) => {
   );
 };
 
-// Ahana
 function CalendarContent() {
   const colors = [
     "#FFB6C1",
@@ -416,14 +729,228 @@ function CalendarContent() {
   );
 }
 
-// Shaylee
 function PlaylistContent() {
-  return <div className="tabcontent"></div>;
+  const [playlist, setPlaylist] = useState([]);
+  const [songValue, setSongValue] = useState("");
+  const [artistValue, setArtistValue] = useState("");
+  const [spotifyLink, setspotifyLink] = useState("");
+  const [spotifyPlaylists, setSpotifyPlaylists] = useState([]);
+
+  const addToList = () => {
+    const newSong = { song: songValue, artist: artistValue };
+    setPlaylist([...playlist, newSong]);
+    setSongValue("");
+    setArtistValue("");
+  };
+
+  const deleteItem = (index) => {
+    const newPlaylist = [...playlist];
+    newPlaylist.splice(index, 1);
+    setPlaylist(newPlaylist);
+  };
+
+  const handleSpotifyLinkChange = (event) => {
+    const link = event.target.value;
+    const regex = /playlist\/([a-zA-Z0-9]+)/;
+    const match = link.match(regex);
+    if (match && match.length > 1) {
+      const playlistId = match[1];
+      setspotifyLink(`https://open.spotify.com/embed/playlist/${playlistId}`);
+    } else {
+      setspotifyLink("");
+    }
+  };
+
+  const handleSpotifyLinkKeyDown = (event) => {
+    if (event.key === "Enter") {
+      event.preventDefault();
+      event.target.value = ""; // Clear the input value
+    }
+  };
+
+  const handleArtistKeyDown = (event) => {
+    if (event.key === "Enter") {
+      event.preventDefault();
+      addToList(); // Add to playlist when Enter key is pressed in artist input
+    }
+  };
+
+  const handleSavePlaylist = () => {
+    if (spotifyLink.trim() !== "") {
+      const playlistName = prompt("Enter a name for this playlist:");
+      if (playlistName) {
+        setSpotifyPlaylists([
+          ...spotifyPlaylists,
+          { name: playlistName, id: spotifyLink },
+        ]);
+        setspotifyLink("");
+      }
+    }
+  };
+
+  const handlePlaylistSelect = (id) => {
+    setspotifyLink(id);
+  };
+
+  const handleDeletePlaylist = (index) => {
+    const newPlaylists = [...spotifyPlaylists];
+    newPlaylists.splice(index, 1);
+    setSpotifyPlaylists(newPlaylists);
+  };
+
+  return (
+    <div className="tabcontent">
+      <h1 className="Title">Playlist</h1>
+      <br />
+      <a id="spotifyLink" href="" target="_blank">
+        Find Your Spotify Library
+      </a>
+      <div className="PlaylistContainer">
+        <div className="SongListContainer">
+          <h3 className="PlaylistSubHeaders">Playlist Songs</h3>
+          <div className="InputContainer">
+            <div>
+              <input
+                type="text"
+                value={songValue}
+                placeholder="Song Name"
+                onChange={(e) => setSongValue(e.target.value)}
+                id="songName"
+              />
+            </div>
+            <div>
+              <input
+                type="text"
+                value={artistValue}
+                placeholder="Artist Name"
+                onChange={(e) => setArtistValue(e.target.value)}
+                onKeyDown={handleArtistKeyDown}
+                id="artistName"
+              />
+            </div>
+          </div>
+          <button id="AddSongButton" onClick={addToList}>
+            {" "}
+            Add Song{" "}
+          </button>
+          <ul>
+            {playlist.map((item, index) => (
+              <li key={index} className="PlaylistItem">
+                {item.song} - {item.artist}
+                <span
+                  className="DeleteMessage"
+                  onClick={() => deleteItem(index)}
+                >
+                  Delete
+                </span>
+              </li>
+            ))}
+          </ul>
+        </div>
+
+        <div className="SpotifyContainer">
+          <h3 className="PlaylistSubHeaders">Spotify Playlist</h3>
+          <label>
+            {" "}
+            Enter the playlist link:
+            <input
+              type="text"
+              value={spotifyLink}
+              placeholder="Playlist Link"
+              onChange={handleSpotifyLinkChange}
+              onKeyDown={handleSpotifyLinkKeyDown} // Handle Enter key press
+            />
+            <p>
+              {" "}
+              Help: "https://open.spotify.com/embed/playlist/
+              <span className="helpMessage">[your-playlist-id-here]</span>
+            </p>
+          </label>
+          <button onClick={handleSavePlaylist}>Save Playlist</button>
+          <ul>
+            {spotifyPlaylists.map((playlist, index) => (
+              <li key={index} id="SpotifyList">
+                <span id="PlaylistName">{playlist.name}</span>
+                <span id="PlaylistButtons">
+                  <span
+                    className="PlayButton"
+                    onClick={() => handlePlaylistSelect(playlist.id)}
+                  >
+                    Play
+                  </span>{" "}
+                  <span
+                    className="DeleteButton"
+                    onClick={() => handleDeletePlaylist(index)}
+                  >
+                    Delete
+                  </span>
+                </span>
+              </li>
+            ))}
+          </ul>
+          {spotifyLink && (
+            <iframe
+              style={{ borderRadius: "12px" }}
+              src={spotifyLink}
+              width="100%"
+              height="352"
+              frameBorder="0"
+              allowFullScreen=""
+              allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
+              loading="lazy"
+            ></iframe>
+          )}
+        </div>
+      </div>
+    </div>
+  );
 }
 
-// Shaylee
 function MoodBoardContent() {
-  return <div className="tabcontent"></div>;
+  const [urlLink, setUrlLink] = useState("");
+  const [photos, setPhotos] = useState([]);
+
+  const handleInputChange = (event) => {
+    setUrlLink(event.target.value);
+  };
+
+  const handleAddPhoto = () => {
+    if (urlLink.trim() !== "") {
+      setPhotos([...photos, urlLink]);
+      setUrlLink("");
+    }
+  };
+  return (
+    <div className="tabcontent">
+      <h2 className="Title">Mood Board</h2>
+      <br />
+      <a
+        id="pinterestLink"
+        href="https://www.pinterest.ca/search/pins/?q=wedding%20mood%20board%20palettes&rs=typed"
+        target="_blank"
+      >
+        Explore Pinterest Ideas
+      </a>
+      <div>
+        <label id="label" htmlFor="urlInput">
+          Paste the URL for your inspiration photo here:
+        </label>
+        <input
+          type="text"
+          id="urlInput"
+          value={urlLink}
+          onChange={handleInputChange}
+          placeholder="URL..."
+        />
+        <button onClick={handleAddPhoto}>Add Photo</button>
+      </div>
+      <div className="ContentContainer">
+        {photos.map((photo, index) => (
+          <img key={index} src={photo} alt={`Photo ${index}`} />
+        ))}
+      </div>
+    </div>
+  );
 }
 
 function Content({ activeTab }) {
