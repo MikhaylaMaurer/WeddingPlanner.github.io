@@ -1,5 +1,6 @@
 import "./App.css";
 import { useState, useEffect } from "react";
+import { API_URL } from "./config";
 
 function Header() {
   return (
@@ -434,7 +435,10 @@ function Vendor({ title, emoji }) {
   );
 }
 
+  
+  
 function BudgetContent() {
+
   const categories = {
     "Invites/Stationary": [
       "Guest Book",
@@ -442,7 +446,7 @@ function BudgetContent() {
       "Save the Date Cards",
       "Invitations",
     ],
-    Transportation: ["Limo/Car Rental", "Shuttle/transportation for guests"],
+    "Transportation": ["Limo/Car Rental", "Shuttle/transportation for guests"],
     "Venue/Catering": [
       "Rehearsal Dinner",
       "Ceremony Facility",
@@ -466,111 +470,175 @@ function BudgetContent() {
     ],
     "Photo/Video": ["Engagement Photos", "Wedding Day Photos", "Videographer"],
   };
-
-  const [budgetItems, setBudgetItems] = useState({});
-  const [totals, setTotals] = useState({ budgeted: 0, actual: 0 });
-
-  const handleBudgetItemChange = (category, name, budgeted, actual) => {
-    setBudgetItems((prevItems) => ({
-      ...prevItems,
-      [category]: {
-        ...prevItems[category],
-        [name]: {
-          budgeted: parseFloat(budgeted) || 0,
-          actual: parseFloat(actual) || 0,
-        },
-      },
-    }));
-  };
-
-  useEffect(() => {
-    const newTotals = Object.values(budgetItems).reduce(
-      (acc, categoryItems) => {
-        Object.values(categoryItems).forEach((item) => {
-          acc.budgeted += item.budgeted;
-          acc.actual += item.actual;
-        });
-        return acc;
-      },
-      { budgeted: 0, actual: 0 }
-    );
-    setTotals(newTotals);
-  }, [budgetItems]);
-
-  return (
-    <div className="budget-container">
-      <h2>Wedding Budget Planner</h2>
-      <div className="budget-header">
-        <div className="budget-header-name">Item</div>
-        <div className="budget-header-budgeted">Budgeted</div>
-        <div className="budget-header-actual">Actual</div>
-      </div>
-      {Object.entries(categories).map(([category, items]) => (
-        <BudgetCategory
-          key={category}
-          category={category}
-          items={items}
-          onValueChange={handleBudgetItemChange}
+  
+  const BudgetItem = ({ item, onValueChange }) => {
+    const [budgeted, setBudgeted] = useState(item.budgeted);
+    const [actual, setActual] = useState(item.actual);
+  
+    const handleBudgetedChange = (e) => {
+      const value = e.target.value;
+      setBudgeted(value);
+      onValueChange(item.category, item.name, value, actual);
+    };
+  
+    const handleActualChange = (e) => {
+      const value = e.target.value;
+      setActual(value);
+      onValueChange(item.category, item.name, budgeted, value);
+    };
+  
+    return (
+      <div className="budget-item">
+        <div className="budget-item-name">{item.name}</div>
+        <input
+          className="budget-item-input"
+          type="number"
+          value={budgeted}
+          onChange={handleBudgetedChange}
         />
-      ))}
-      <div className="budget-summary">
-        <div>Total Budgeted: {totals.budgeted.toFixed(2)}</div>
-        <div>Total Actual Spent: {totals.actual.toFixed(2)}</div>
+        <input
+          className="budget-item-input"
+          type="number"
+          value={actual}
+          onChange={handleActualChange}
+        />
       </div>
+    );
+  };
+  
+  const BudgetCategory = ({ category, items, onValueChange }) => {
+    return (
+      <div className="budget-category">
+        <h2>{category}</h2>
+        {items.map((item) => (
+          <BudgetItem
+            key={item.name}
+            item={item}
+            onValueChange={onValueChange}
+          />
+        ))}
+      </div>
+    );
+  };
+  
+  const BudgetPlanner = () => {
+    const [budgetItems, setBudgetItems] = useState({});
+    const [totals, setTotals] = useState({ budgeted: 0, actual: 0 });
+  
+    useEffect(() => {
+      const initialBudgetItems = Object.entries(categories).reduce((acc, [category, items]) => {
+        acc[category] = items.map(item => ({
+          name: item,
+          budgeted: 0,
+          actual: 0,
+          category
+        }));
+        return acc;
+      }, {});
+      setBudgetItems(initialBudgetItems);
+    }, []);
+  
+    useEffect(() => {
+      const fetchBudgetItems = async () => {
+        try {
+          const response = await fetch(`${API_URL}/budget`);
+          if (!response.ok) {
+            throw new Error('Network response was not ok');
+          }
+          const data = await response.json();
+          const itemsByCategory = data.reduce((acc, item) => {
+            if (acc[item.category]) {
+              const itemIndex = acc[item.category].findIndex(i => i.name === item.name);
+              if (itemIndex >= 0) {
+                acc[item.category][itemIndex].budgeted = item.budgeted || 0;
+                acc[item.category][itemIndex].actual = item.actual || 0;
+              }
+            }
+            return acc;
+          }, {...budgetItems});
+          setBudgetItems(itemsByCategory);
+        } catch (error) {
+          console.error('Error fetching budget items:', error);
+        }
+      };
+  
+      fetchBudgetItems();
+    }, [budgetItems]);
+  
+    const handleBudgetItemChange = async (category, name, budgeted, actual) => {
+      const updatedItems = { ...budgetItems };
+      if (!updatedItems[category]) {
+        updatedItems[category] = [];
+      }
+      const itemIndex = updatedItems[category].findIndex(i => i.name === name);
+      const newItem = {
+        name,
+        budgeted: parseFloat(budgeted) || 0,
+        actual: parseFloat(actual) || 0,
+        category
+      };
+  
+      if (itemIndex >= 0) {
+        updatedItems[category][itemIndex] = newItem;
+      } else {
+        updatedItems[category].push(newItem);
+      }
+  
+      setBudgetItems(updatedItems);
+  
+      try {
+        const response = await fetch(API_URL, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(newItem),
+        });
+  
+        if (!response.ok) {
+          throw new Error('Network response was not ok');
+        }
+      } catch (error) {
+        console.error('Error saving the budget item:', error);
+      }
+    };
+  
+    useEffect(() => {
+      const newTotals = Object.values(budgetItems).flat().reduce(
+        (acc, item) => {
+          acc.budgeted += item.budgeted || 0;
+          acc.actual += item.actual || 0;
+          return acc;
+        },
+        { budgeted: 0, actual: 0 }
+      );
+      setTotals(newTotals);
+    }, [budgetItems]);
+    
+    return (
+      <div className='budget-container'>
+        <h1>Wedding Budget Planner</h1>
+        {Object.entries(budgetItems).map(([category, items]) => (
+          <BudgetCategory
+            key={category}
+            category={category}
+            items={items}
+            onValueChange={handleBudgetItemChange}
+          />
+        ))}
+        <div className='budget-summary'>
+          <div>Total Budgeted: {totals.budgeted.toFixed(2)}</div>
+          <div>Total Actual Spent: {totals.actual.toFixed(2)}</div>
+        </div>
+      </div>
+    );
+  };
+  return (
+    <div className="tabcontent">
+      <BudgetPlanner />
     </div>
   );
 }
 
-const BudgetItem = ({ category, name, onValueChange }) => {
-  const [budgeted, setBudgeted] = useState("");
-  const [actual, setActual] = useState("");
-
-  const handleBudgetedChange = (e) => {
-    const value = e.target.value;
-    setBudgeted(value);
-    onValueChange(category, name, value, actual);
-  };
-
-  const handleActualChange = (e) => {
-    const value = e.target.value;
-    setActual(value);
-    onValueChange(category, name, budgeted, value);
-  };
-
-  return (
-    <div className="budget-item">
-      <div className="budget-item-name">{name}</div>
-      <input
-        className="budget-item-input"
-        type="number"
-        value={budgeted}
-        onChange={handleBudgetedChange}
-      />
-      <input
-        className="budget-item-input"
-        type="number"
-        value={actual}
-        onChange={handleActualChange}
-      />
-    </div>
-  );
-};
-
-const BudgetCategory = ({ category, items, onValueChange }) => {
-  return (
-    <div className="budget-category">
-      <h2>{category}</h2>
-      {items.map((item) => (
-        <BudgetItem
-          key={item}
-          category={category}
-          name={item}
-          onValueChange={onValueChange}
-        />
-      ))}
-    </div>
-  );
-};
+  
 
 function CalendarContent() {
   const colors = [
