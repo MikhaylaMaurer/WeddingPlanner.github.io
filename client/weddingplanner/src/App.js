@@ -525,7 +525,9 @@ function VendorContent() {
   const fetchVendorData = async () => {
     try {
       const username = localStorage.getItem("user");
-      const response = await fetch(`/api/vendors/${username}`);
+      const response = await fetch(
+        `http://localhost:5000/api/vendors/${username}`
+      );
       if (response.ok) {
         const data = await response.json();
         setVendorData(data.vendors || []);
@@ -543,24 +545,40 @@ function VendorContent() {
   const handleSave = async () => {
     try {
       const username = localStorage.getItem("user");
-      const vendorData = vendors.map((vendor) => ({
-        title: vendor.title,
-        name: document.getElementById(`${vendor.title.toLowerCase()}_name`)
-          .value,
-        phoneNumber: document.getElementById(
+      const vendorData = [];
+   
+      vendors.forEach((vendor) => {
+        const nameInput = document.getElementById(
+          `${vendor.title.toLowerCase()}_name`
+        );
+        const phoneNumberInput = document.getElementById(
           `${vendor.title.toLowerCase()}_number`
-        ).value,
-        email: document.getElementById(`${vendor.title.toLowerCase()}_email`)
-          .value,
-      }));
+        );
+        const emailInput = document.getElementById(
+          `${vendor.title.toLowerCase()}_email`
+        );
 
-      const response = await fetch("/api/vendors", {
+        if (nameInput && phoneNumberInput && emailInput) {
+          const data = {
+            title: vendor.title,
+            name: nameInput.value,
+            phoneNumber: phoneNumberInput.value,
+            email: emailInput.value,
+          };
+          vendorData.push(data);
+        }
+      });
+      console.log("Vendor Data before sending:", vendorData);
+
+      const response = await fetch("http://localhost:5000/api/vendors", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({ user: username, vendors: vendorData }),
       });
+
+      console.log("Response:", response);
 
       if (response.ok) {
         alert("Vendor information saved successfully!");
@@ -571,26 +589,6 @@ function VendorContent() {
       console.error("Error saving vendor information:", error);
       alert("Failed to save vendor information.");
     }
-    // try {
-    //   // Send vendors data to the backend
-    //   const response = await fetch("/api/vendors", {
-    //     method: "POST",
-    //     headers: {
-    //       "Content-Type": "application/json",
-    //     },
-    //     body: JSON.stringify(vendors),
-    //   });
-
-    //   if (response.ok) {
-    //     alert("Vendor information saved successfully!");
-    //   } else {
-    //     throw new Error("Failed to save vendor information");
-    //   }
-    // } catch (error) {
-    //   console.error("Error saving vendor information:", error);
-    //   alert("Failed to save vendor information.");
-    // <Vendor key={index} title={vendor.title} emoji={vendor.emoji} />
-    // }
   };
 
   return (
@@ -603,15 +601,11 @@ function VendorContent() {
       </p>
 
       {vendors.map((vendor, index) => (
-        <div key={index}>
-          <h3>
-            <Vendor
-            title={vendor.title}
-            emoji={vendor.emoji}
-              vendor={vendorData.find((item) => item.title === vendor.title)}
-            />
-          </h3>
-        </div>
+        <Vendor
+          title={vendor.title}
+          emoji={vendor.emoji}
+          vendor={vendorData.find((item) => item.title === vendor.title)}
+        />
       ))}
       <input
         style={{ marginLeft: "35%" }}
@@ -625,10 +619,13 @@ function VendorContent() {
 }
 
 function Vendor({ title, emoji }) {
-  
-    const [name, setName] = useState('');
-  const [phoneNumber, setPhoneNumber] = useState('');
-  const [email, setEmail] = useState('');
+  const [name, setName] = useState("");
+  const [phoneNumber, setPhoneNumber] = useState("");
+  const [email, setEmail] = useState("");
+
+  const nameId = `${title.toLowerCase()}_name`;
+  const phoneNumberId = `${title.toLowerCase()}_number`;
+  const emailId = `${title.toLowerCase()}_email`;
 
   return (
     <>
@@ -636,33 +633,35 @@ function Vendor({ title, emoji }) {
         {title} {emoji}
       </h3>
       <h4>
-        Name: <input type="text" value={name} onChange={(e) => setName(e.target.value)} />
+        Name:{" "}
+        <input
+          type="text"
+          id={nameId}
+          value={name}
+          onChange={(e) => setName(e.target.value)}
+        />
       </h4>
       <h4>
-        Phone Number: <input type="text" value={phoneNumber} onChange={(e) => setPhoneNumber(e.target.value)} />
+        Phone Number:{" "}
+        <input
+          type="text"
+          id={phoneNumberId}
+          value={phoneNumber}
+          onChange={(e) => setPhoneNumber(e.target.value)}
+        />
       </h4>
       <h4>
-        E-Mail: <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} />
+        E-Mail:{" "}
+        <input
+          type="email"
+          id={emailId}
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+        />
       </h4>
       <br />
     </>
   );
-    // <>
-    //   <h3>
-    //     {title} {emoji}
-    //   </h3>
-    //   <h4>
-    //     Name: <input type="text" id={`${title.toLowerCase()}_name`} />
-    //   </h4>
-    //   <h4>
-    //     Phone Number: <input type="text" id={`${title.toLowerCase()}_number`} />
-    //   </h4>
-    //   <h4>
-    //     E-Mail: <input type="email" id={`${title.toLowerCase()}_email`} />
-    //   </h4>
-    //   <br />
-    // </>
-  
 }
 
 function BudgetContent() {

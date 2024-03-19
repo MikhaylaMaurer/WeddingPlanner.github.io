@@ -194,6 +194,24 @@ function GuestlistContent() {
   const [inputRSVP, setInputRSVP] = useState(false);
   const [editIndex, setEditIndex] = useState(null);
 
+  useEffect(() => {
+    // Fetch initial guest list from the server when component mounts
+    fetchGuestList();
+  }, []);
+
+  const fetchGuestList = async () => {
+    try {
+      const username = localStorage.getItem("user");
+      const response = await fetch(
+        `http://localhost:5000/api/guests?username=${username}`
+      ); // Assumes your backend route for fetching guests is '/api/guests'
+      const data = await response.json();
+      setGuests(data);
+    } catch (error) {
+      console.error("Error fetching guest list:", error);
+    }
+  };
+
   const handleNameChange = (e) => {
     setInputName(e.target.value);
   };
@@ -214,40 +232,93 @@ function GuestlistContent() {
     setInputRSVP(e.target.checked);
   };
 
-  const handleAddGuest = () => {
+  const handleAddGuest = async () => {
     if (inputName.trim() !== "") {
+      const username = localStorage.getItem("user");
       const newGuest = {
-        name: inputName,
+        user: username,
+        firstName: inputName,
         phoneNumber: inputPhoneNumber,
         address: inputAddress,
         mealPreference: inputMealPreference,
-        rsvp: inputRSVP,
+        rsvpStatus: inputRSVP ? "RSVP'd" : "Not RSVP'd",
       };
-      setGuests([...guests, newGuest]);
-      setInputName("");
-      setInputPhoneNumber("");
-      setInputAddress("");
-      setInputMealPreference("");
-      setInputRSVP(false);
+      try {
+        const response = await fetch("http://localhost:5000/api/addGuest", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(newGuest),
+        });
+        if (response.ok) {
+          fetchGuestList(); // Refresh guest list after adding a guest
+          setInputName("");
+          setInputPhoneNumber("");
+          setInputAddress("");
+          setInputMealPreference("");
+          setInputRSVP(false);
+        } else {
+          console.error("Failed to add guest");
+        }
+      } catch (error) {
+        console.error("Error adding guest:", error);
+      }
     }
   };
 
-  const handleRemoveGuest = (index) => {
-    const updatedGuests = [...guests];
-    updatedGuests.splice(index, 1);
-    setGuests(updatedGuests);
+  const handleRemoveGuest = async (id) => {
+    try {
+      const response = await fetch(
+        `http://localhost:5000/api/removeGuest/${id}`,
+        {
+          method: "DELETE",
+        }
+      );
+      if (response.ok) {
+        fetchGuestList(); // Refresh guest list after removing a guest
+      } else {
+        console.error("Failed to remove guest");
+      }
+    } catch (error) {
+      console.error("Error removing guest:", error);
+    }
   };
 
   const handleEditRSVP = (index) => {
     setEditIndex(index);
-    setInputRSVP(guests[index].rsvp);
+    setInputRSVP(guests[index].rsvpStatus === "RSVP'd");
   };
 
-  const handleSaveRSVP = () => {
-    const updatedGuests = [...guests];
-    updatedGuests[editIndex].rsvp = inputRSVP;
-    setGuests(updatedGuests);
-    setEditIndex(null);
+  const handleSaveRSVP = async () => {
+    console.log("editIndex:", editIndex);
+    console.log("guests:", guests);
+    if (editIndex !== null) {
+      const updatedGuests = guests[editIndex];
+      console.log("updatedGuest:", updatedGuests);
+      updatedGuests.rsvpStatus = inputRSVP ? "RSVP'd" : "Not RSVP'd";
+      try {
+        const response = await fetch(
+          `http://localhost:5000/api/updateGuest/${updatedGuests._id}`,
+          {
+            method: "PUT",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify(updatedGuests),
+          }
+        );
+
+        if (response.ok) {
+          fetchGuestList(); // Refresh guest list after updating RSVP
+          setEditIndex(null); // Reset edit index
+        } else {
+          console.error("Failed to update RSVP");
+        }
+      } catch (error) {
+        console.error("Error updating RSVP:", error);
+      }
+    }
   };
 
   return (
@@ -299,10 +370,11 @@ function GuestlistContent() {
       <div className="list">
         <ul>
           {guests.map((guest, index) => (
-            <li key={index}>
-              {guest.name} - {guest.phoneNumber} - {guest.address} -{" "}
-              {guest.mealPreference} - {guest.rsvp ? "RSVP'd" : "Not RSVP'd"}
-              <button onClick={() => handleRemoveGuest(index)}>
+            <li key={guest._id}>
+              {guest.firstName} - {guest.phoneNumber} - {guest.address} -{" "}
+              {guest.mealPreference} -{" "}
+              {guest.rsvpStatus === "RSVP'd" ? "RSVP'd" : "Not RSVP'd"}
+              <button onClick={() => handleRemoveGuest(guest._id)}>
                 Remove Guest
               </button>
               {!editIndex && (
@@ -392,6 +464,82 @@ function VendorContent() {
     { title: "Decorator", emoji: "🎨" },
     { title: "Florist", emoji: "💐" },
   ];
+
+  const [vendorData, setVendorData] = useState([]);
+
+  useEffect(() => {
+    fetchVendorData();
+  }, []);
+
+  const fetchVendorData = async () => {
+    try {
+      const username = localStorage.getItem("user");
+      const response = await fetch(
+        `http://localhost:5000/api/vendors/${username}`
+      );
+      if (response.ok) {
+        const data = await response.json();
+        setVendorData(data.vendors || []);
+      } else {
+        console.error(
+          "Failed to fetch vendor information:",
+          response.statusText
+        );
+      }
+    } catch (error) {
+      console.error("Error fetching vendor information:", error);
+    }
+  };
+
+  const handleSave = async () => {
+    try {
+      const username = localStorage.getItem("user");
+      const vendorData = [];
+   
+      vendors.forEach((vendor) => {
+        const nameInput = document.getElementById(
+          `${vendor.title.toLowerCase()}_name`
+        );
+        const phoneNumberInput = document.getElementById(
+          `${vendor.title.toLowerCase()}_number`
+        );
+        const emailInput = document.getElementById(
+          `${vendor.title.toLowerCase()}_email`
+        );
+
+        if (nameInput && phoneNumberInput && emailInput) {
+          const data = {
+            title: vendor.title,
+            name: nameInput.value,
+            phoneNumber: phoneNumberInput.value,
+            email: emailInput.value,
+          };
+          vendorData.push(data);
+        }
+      });
+      console.log("Vendor Data before sending:", vendorData);
+
+      const response = await fetch("http://localhost:5000/api/vendors", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ user: username, vendors: vendorData }),
+      });
+
+      console.log("Response:", response);
+
+      if (response.ok) {
+        alert("Vendor information saved successfully!");
+      } else {
+        throw new Error("Failed to save vendor information");
+      }
+    } catch (error) {
+      console.error("Error saving vendor information:", error);
+      alert("Failed to save vendor information.");
+    }
+  };
+
   return (
     <div className="tabcontent">
       <h2>Vendor List</h2>
@@ -402,32 +550,63 @@ function VendorContent() {
       </p>
 
       {vendors.map((vendor, index) => (
-        <Vendor key={index} title={vendor.title} emoji={vendor.emoji} />
+        <Vendor
+          title={vendor.title}
+          emoji={vendor.emoji}
+          vendor={vendorData.find((item) => item.title === vendor.title)}
+        />
       ))}
       <input
         style={{ marginLeft: "35%" }}
         type="button"
         value="Save Vendor Information"
         id="save"
+        onClick={handleSave}
       />
     </div>
   );
 }
 
 function Vendor({ title, emoji }) {
+  const [name, setName] = useState("");
+  const [phoneNumber, setPhoneNumber] = useState("");
+  const [email, setEmail] = useState("");
+
+  const nameId = `${title.toLowerCase()}_name`;
+  const phoneNumberId = `${title.toLowerCase()}_number`;
+  const emailId = `${title.toLowerCase()}_email`;
+
   return (
     <>
       <h3>
         {title} {emoji}
       </h3>
       <h4>
-        Name: <input type="text" id={`${title.toLowerCase()}_name`} />
+        Name:{" "}
+        <input
+          type="text"
+          id={nameId}
+          value={name}
+          onChange={(e) => setName(e.target.value)}
+        />
       </h4>
       <h4>
-        Phone Number: <input type="text" id={`${title.toLowerCase()}_number`} />
+        Phone Number:{" "}
+        <input
+          type="text"
+          id={phoneNumberId}
+          value={phoneNumber}
+          onChange={(e) => setPhoneNumber(e.target.value)}
+        />
       </h4>
       <h4>
-        E-Mail: <input type="email" id={`${title.toLowerCase()}_email`} />
+        E-Mail:{" "}
+        <input
+          type="email"
+          id={emailId}
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+        />
       </h4>
       <br />
     </>
