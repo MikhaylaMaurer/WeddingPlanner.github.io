@@ -2,9 +2,10 @@
 const express = require('express');
 const db = require('./config/db');
 const authRoutes = require('./routes/Auth');
-const guestRoutes = require('./routes/Guest'); // Import guest routes
+const guestRoutes = require('./routes/Guest');
 const checklistRoutes = require('./routes/Check');
 const vendorRoutes = require('./routes/Vendor');
+const dayOfRoutes = require('./routes/DayOf');
 const cors = require('cors');
 
 const app = express();
@@ -24,6 +25,8 @@ app.use('/api', guestRoutes);
 app.use('/api/checklist', checklistRoutes);
 
 app.use('/api/vendors', vendorRoutes);
+
+app.use('/api/dayof', dayOfRoutes);
 
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
