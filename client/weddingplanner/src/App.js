@@ -2,6 +2,7 @@ import "./App.css";
 import Login from "./Login.js";
 import { useState, useEffect } from "react";
 import { BrowserRouter as Router, Route, Redirect } from "react-router-dom";
+import TableChairsImg from './table_chairs.png';
 
 function Header({ onLogout }) {
   return (
@@ -439,16 +440,131 @@ function GuestlistContent() {
   );
 }
 
+
 function SeatingContent() {
-  return <div className="tabcontent"></div>;
-}
+  const TableAndChairs = ({ tableNum }) => {
+    const [guests, setGuests] = useState(Array.from({ length: 8 }, () => ""));
+    const [activeIndex, setActiveIndex] = useState(null); // Index of the active input
+    const [showInput, setShowInput] = useState(false);
+
+    const handleGuestNameChange = (index, event) => {
+      const updatedGuests = [...guests];
+      updatedGuests[index] = event.target.value;
+      setGuests(updatedGuests);
+    };
+
+    const handleKeyDown = (event) => {
+      if (event.key === 'Enter') {
+        const updatedGuests = [...guests];
+        updatedGuests[activeIndex] = event.target.value;
+        setGuests(updatedGuests);
+        setActiveIndex(null);
+        setShowInput(false); // Hide the input box after hitting enter
+        // Update the guest name in the table
+      }
+    };
+
+    const handleTableClick = (index) => {
+      setActiveIndex(index);
+      setShowInput(true);
+    };
+
+    return (
+      <div className="tableAndChairsContainer">
+        <div className="imageContainer">
+          <img className="imageProperties" src={TableChairsImg} alt="TableAndChairsSet" />
+        </div>
+        <div className="guestNamesContainer">
+          <table className="guestNamesTable">
+            <thead>
+              <tr>
+                <th colSpan="2">Table {tableNum}</th>
+              </tr>
+              <tr>
+                <th>Seat #</th>
+                <th>Guest Name</th>
+              </tr>
+            </thead>
+            <tbody>
+              {guests.map((guest, index) => (
+                <tr key={index}>
+                  <td onClick={() => handleTableClick(index)}>{index + 1}</td>
+                  <td>{activeIndex === index && showInput ? (
+                    <input
+                      type="text"
+                      value={guest}
+                      onChange={(event) => handleGuestNameChange(index, event)}
+                      onKeyDown={handleKeyDown}
+                      autoFocus
+                    />
+                  ) : (
+                    guest
+                  )}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    );
+  };
+
+  return (
+    <div className="tabcontent SeatingContentContainer">
+      <TableAndChairs tableNum={1} />
+      <TableAndChairs tableNum={2} />
+      <TableAndChairs tableNum={3} />
+      <TableAndChairs tableNum={4} />
+    </div>
+  );
+};
 
 function DayOfContent() {
   const [events, setEvents] = useState([]);
   const [newEvent, setNewEvent] = useState({ time: "", description: "" });
 
-  const addEvent = (event) => {
+  useEffect(() => {
+    fetchDayOfEvents();
+  }, []);
+
+  const fetchDayOfEvents = async () => {
+    try {
+      const username = localStorage.getItem("user");
+      const response = await fetch(
+        `http://localhost:5000/api/dayof/events?username=${username}`
+      ); // Fetch events from backend
+      const data = await response.json();
+      setEvents(data); // Set events state with fetched events
+    } catch (error) {
+      console.error("Error fetching events:", error);
+    }
+  };
+
+  const addEvent = async (event) => {
     event.preventDefault();
+    try {
+      const username = localStorage.getItem("user");
+      const requestBody = { user: username, ...newEvent }; // Construct the request body
+      console.log("Request Body:", requestBody);
+      console.log(username);
+      const response = await fetch("http://localhost:5000/api/dayof/addEvent", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(requestBody),
+      });
+      if (response.ok) {
+        const eventData = await response.json();
+        setEvents([...events, eventData]);
+        setNewEvent({ time: "", description: "" });
+      } else {
+        throw new Error("Failed to add event");
+      }
+    } catch (error) {
+      console.error("Error adding event:", error);
+    }
+
     const sortedEvents = [...events, newEvent].sort((a, b) =>
       a.time.localeCompare(b.time)
     );
@@ -461,8 +577,19 @@ function DayOfContent() {
     setNewEvent({ ...newEvent, [name]: value });
   };
 
-  const removeEvent = (indexToRemove) => {
-    setEvents(events.filter((_, index) => index !== indexToRemove));
+  const removeEvent = async (indexToRemove) => {
+    try {
+      const response = await fetch(`http://localhost:5000/api/dayof/removeEvent/${indexToRemove}`, {
+        method: "DELETE",
+      });
+      if (response.ok) {
+        fetchDayOfEvents();
+      } else {
+        throw new Error("Failed to remove event");
+      }
+    } catch (error) {
+      console.error("Error removing event:", error);
+    }
   };
 
   return (
@@ -492,8 +619,8 @@ function DayOfContent() {
             <li key={index} className="event-item">
               <span>{event.time}</span> - <span>{event.description}</span>
               <button
-                onClick={() => removeEvent(index)}
-                clannName="remove-button"
+                onClick={() => removeEvent(event._id)}
+                className="remove-button"
               >
                 Remove
               </button>
@@ -530,6 +657,7 @@ function VendorContent() {
       );
       if (response.ok) {
         const data = await response.json();
+        console.log("Fetched vendor data:", data);
         setVendorData(data.vendors || []);
       } else {
         console.error(
@@ -546,7 +674,7 @@ function VendorContent() {
     try {
       const username = localStorage.getItem("user");
       const vendorData = [];
-   
+
       vendors.forEach((vendor) => {
         const nameInput = document.getElementById(
           `${vendor.title.toLowerCase()}_name`
@@ -600,11 +728,12 @@ function VendorContent() {
         Save your vendor information with the button at the bottom of the page.
       </p>
 
-      {vendors.map((vendor, index) => (
+      {vendors.map((vendor) => (
         <Vendor
+          key={vendor.title}
           title={vendor.title}
           emoji={vendor.emoji}
-          vendor={vendorData.find((item) => item.title === vendor.title)}
+          vendor={vendorData.find((data) => data.title === vendor.title) || {}} // Pass the corresponding vendor data from vendorData array
         />
       ))}
       <input
@@ -618,10 +747,27 @@ function VendorContent() {
   );
 }
 
-function Vendor({ title, emoji }) {
-  const [name, setName] = useState("");
-  const [phoneNumber, setPhoneNumber] = useState("");
-  const [email, setEmail] = useState("");
+function Vendor({ title, emoji, vendor }) {
+  const vendorName = vendor.name || "";
+  const vendorPhoneNumber = vendor.phoneNumber || "";
+  const vendorEmail = vendor.email || "";
+
+  // Initialize state with values from vendor prop
+  const [name, setName] = useState(vendorName);
+  const [phoneNumber, setPhoneNumber] = useState(vendorPhoneNumber);
+  const [email, setEmail] = useState(vendorEmail);
+
+  const handleNameChange = (e) => {
+    setName(e.target.value);
+  };
+
+  const handlePhoneNumberChange = (e) => {
+    setPhoneNumber(e.target.value);
+  };
+
+  const handleEmailChange = (e) => {
+    setEmail(e.target.value);
+  };
 
   const nameId = `${title.toLowerCase()}_name`;
   const phoneNumberId = `${title.toLowerCase()}_number`;
@@ -638,7 +784,7 @@ function Vendor({ title, emoji }) {
           type="text"
           id={nameId}
           value={name}
-          onChange={(e) => setName(e.target.value)}
+          onChange={handleNameChange}
         />
       </h4>
       <h4>
@@ -647,7 +793,7 @@ function Vendor({ title, emoji }) {
           type="text"
           id={phoneNumberId}
           value={phoneNumber}
-          onChange={(e) => setPhoneNumber(e.target.value)}
+          onChange={handlePhoneNumberChange}
         />
       </h4>
       <h4>
@@ -656,7 +802,7 @@ function Vendor({ title, emoji }) {
           type="email"
           id={emailId}
           value={email}
-          onChange={(e) => setEmail(e.target.value)}
+          onChange={handleEmailChange}
         />
       </h4>
       <br />
@@ -697,76 +843,98 @@ function BudgetContent() {
     "Photo/Video": ["Engagement Photos", "Wedding Day Photos", "Videographer"],
   };
 
-  const [budgetItems, setBudgetItems] = useState({});
-  const [totals, setTotals] = useState({ budgeted: 0, actual: 0 });
-
-  const handleBudgetItemChange = (category, name, budgeted, actual) => {
-    setBudgetItems((prevItems) => ({
-      ...prevItems,
-      [category]: {
-        ...prevItems[category],
-        [name]: {
-          budgeted: parseFloat(budgeted) || 0,
-          actual: parseFloat(actual) || 0,
-        },
-      },
-    }));
-  };
+  const [budgetData, setBudgetData] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    const newTotals = Object.values(budgetItems).reduce(
-      (acc, categoryItems) => {
-        Object.values(categoryItems).forEach((item) => {
-          acc.budgeted += item.budgeted;
-          acc.actual += item.actual;
-        });
-        return acc;
-      },
-      { budgeted: 0, actual: 0 }
-    );
-    setTotals(newTotals);
-  }, [budgetItems]);
+    fetchBudgetData();
+  }, []);
+
+  const fetchBudgetData = async () => {
+    try {
+      const username = localStorage.getItem("user");
+      const response = await fetch(
+        `http://localhost:5000/api/budget/${username}`
+      );
+      if (response.ok) {
+        const data = await response.json();
+        setBudgetData(data.budgetCategories || []);
+      } else {
+        console.error(
+          "Failed to fetch budget data:",
+          response.statusText
+        );
+      }
+    } catch (error) {
+      console.error("Error fetching budget data:", error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleSave = async () => {
+    try {
+      const username = localStorage.getItem("user");
+      const response = await fetch("http://localhost:5000/api/budget", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ user: username, budgetCategories: budgetData }),
+      });
+
+      if (response.ok) {
+        alert("Budget data saved successfully!");
+      } else {
+        throw new Error("Failed to save budget data");
+      }
+    } catch (error) {
+      console.error("Error saving budget data:", error);
+      alert("Failed to save budget data.");
+    }
+  };
+
+  const handleBudgetItemChange = (categoryTitle, itemName, budgeted, actual) => {
+    const updatedBudgetData = budgetData.map((category) => {
+      if (category.title === categoryTitle) {
+        return {
+          ...category,
+          items: category.items.map((item) => {
+            if (item.name === itemName) {
+              return { ...item, budgeted, actual };
+            }
+            return item;
+          }),
+        };
+      }
+      return category;
+    });
+    setBudgetData(updatedBudgetData);
+  };
 
   return (
-    <div className="budget-container">
+    <div className="tabcontent">
       <h2>Wedding Budget Planner</h2>
-      <div className="budget-header">
-        <div className="budget-header-name">Item</div>
-        <div className="budget-header-budgeted">Budgeted</div>
-        <div className="budget-header-actual">Actual</div>
-      </div>
-      {Object.entries(categories).map(([category, items]) => (
-        <BudgetCategory
-          key={category}
-          category={category}
-          items={items}
-          onValueChange={handleBudgetItemChange}
-        />
-      ))}
-      <div className="budget-summary">
-        <div>Total Budgeted: {totals.budgeted.toFixed(2)}</div>
-        <div>Total Actual Spent: {totals.actual.toFixed(2)}</div>
-      </div>
+      {isLoading && <div>Loading...</div>}
+      {!isLoading && budgetData.length === 0 && <div>No budget data available.</div>}
+      {!isLoading && budgetData.length > 0 && (
+        <>
+          {budgetData.map((category) => (
+            <BudgetCategory
+              key={category.title}
+              category={category.title}
+              items={category.items}
+              onValueChange={handleBudgetItemChange}
+            />
+          ))}
+          <button onClick={handleSave}>Save Budget</button>
+        </>
+      )}
     </div>
   );
 }
 
-const BudgetItem = ({ category, name, onValueChange }) => {
-  const [budgeted, setBudgeted] = useState("");
-  const [actual, setActual] = useState("");
-
-  const handleBudgetedChange = (e) => {
-    const value = e.target.value;
-    setBudgeted(value);
-    onValueChange(category, name, value, actual);
-  };
-
-  const handleActualChange = (e) => {
-    const value = e.target.value;
-    setActual(value);
-    onValueChange(category, name, budgeted, value);
-  };
-
+const BudgetItem = ({ category, name, budgeted, actual, onValueChange }) => {
   return (
     <div className="budget-item">
       <div className="budget-item-name">{name}</div>
@@ -774,382 +942,587 @@ const BudgetItem = ({ category, name, onValueChange }) => {
         className="budget-item-input"
         type="number"
         value={budgeted}
-        onChange={handleBudgetedChange}
+        onChange={(e) => onValueChange(category, name, parseFloat(e.target.value), actual)}
       />
       <input
         className="budget-item-input"
         type="number"
         value={actual}
-        onChange={handleActualChange}
+        onChange={(e) => onValueChange(category, name, budgeted, parseFloat(e.target.value))}
       />
     </div>
   );
 };
 
 const BudgetCategory = ({ category, items, onValueChange }) => {
+  const totalBudgeted = items.reduce((sum, item) => sum + item.budgeted, 0);
+  const totalActual = items.reduce((sum, item) => sum + item.actual, 0);
+
   return (
     <div className="budget-category">
       <h2>{category}</h2>
       {items.map((item) => (
         <BudgetItem
-          key={item}
+          key={item.name}
           category={category}
-          name={item}
+          name={item.name}
+          budgeted={item.budgeted}
+          actual={item.actual}
           onValueChange={onValueChange}
         />
       ))}
-    </div>
-  );
-};
-
-function CalendarContent() {
-  const colors = [
-    "#FFB6C1",
-    "#FFC0CB",
-    "#DC143C",
-    "#FFF0F5",
-    "#DB7093",
-    "#FFA07A",
-    "#FA8072",
-    "#FF4500",
-    "#FFD700",
-    "#FFA500",
-    "#7FFF00",
-    "#7CFC00",
-    "#ADFF2F",
-    "#006400",
-    "#9ACD32",
-    "#40E0D0",
-    "#20B2AA",
-    "#48D1CC",
-    "#00FFFF",
-    "#5F9EA0",
-  ];
-  const [events, setEvents] = useState({});
-  const [inputValue, setInputValue] = useState("");
-  const [selectedColor, setSelectedColor] = useState(colors[0]);
-  const [selectedDate, setSelectedDate] = useState(null);
-  const [showColorOptions, setShowColorOptions] = useState(false);
-  const currentYear = new Date().getFullYear();
-  const months = [
-    "January",
-    "February",
-    "March",
-    "April",
-    "May",
-    "June",
-    "July",
-    "August",
-    "September",
-    "October",
-    "November",
-    "December",
-  ];
-
-  const getDaysInMonth = (monthIndex, year) => {
-    return Array.from(
-      { length: new Date(year, monthIndex + 1, 0).getDate() },
-      (_, i) => i + 1
-    );
-  };
-  const handleDayClick = (day, monthIndex) => {
-    const dateKey = `${day}-${months[monthIndex]}-${currentYear}`;
-    setSelectedDate(dateKey);
-    if (events[dateKey]) {
-      removeEvent(dateKey);
-    }
-  };
-
-  const addEvent = () => {
-    if (inputValue.trim() && selectedDate) {
-      const newEvents = {
-        ...events,
-        [selectedDate]: { name: inputValue, color: selectedColor },
-      };
-      setEvents(newEvents);
-      setInputValue("");
-      setSelectedDate(null);
-    }
-  };
-  const removeEvent = (dateKey) => {
-    const updatedEvents = { ...events };
-    delete updatedEvents[dateKey];
-    setEvents(updatedEvents);
-  };
-
-  const getEventListByColor = () => {
-    return Object.values(events).reduce((acc, { name, color }) => {
-      (acc[color] = acc[color] || new Set()).add(name);
-      return acc;
-    }, {});
-  };
-
-  return (
-    <div className="calendar-container">
-      <div className="controls">
-        <input
-          type="text"
-          value={inputValue}
-          onChange={(e) => setInputValue(e.target.value)}
-          placeholder="Event Name"
-        />
-        <div
-          className="color-selector"
-          onClick={() => setShowColorOptions(!showColorOptions)}
-        >
-          <div
-            className="selected-color"
-            style={{ backgroundColor: selectedColor }}
-          ></div>
-          {showColorOptions && (
-            <div className="color-options">
-              {colors.map((color) => (
-                <div
-                  key={color}
-                  className="color-option"
-                  style={{ backgroundColor: color }}
-                  onClick={() => {
-                    setSelectedColor(color);
-                    setShowColorOptions(false);
-                  }}
-                />
-              ))}
-            </div>
-          )}
-        </div>
-        <button onClick={addEvent}>Add Event</button>
+      <div className="budget-totals">
+        <div>Total Budgeted: ${totalBudgeted.toFixed(2)}</div>
+        <div>Total Actual: ${totalActual.toFixed(2)}</div>
       </div>
-
-      <div className="legend">
-        <h4>Color Legend:</h4>
-        {Object.entries(getEventListByColor()).map(([color, eventNames]) => (
-          <div key={color} className="legend-item">
-            <span
-              className="color-box"
-              style={{ backgroundColor: color }}
-            ></span>
-            <span className="event-names">{[...eventNames].join(", ")}</span>
-          </div>
-        ))}
-      </div>
-
-      {months.map((month, index) => (
-        <div key={month} className="month-container">
-          <h3>{month}</h3>
-          <div className="days-grid">
-            {getDaysInMonth(index, currentYear).map((day) => {
-              const dateKey = `${day}-${month}-${currentYear}`;
-              return (
-                <div
-                  key={day}
-                  className={`day ${events[dateKey] ? "event-day" : ""}`}
-                  style={{
-                    backgroundColor: events[dateKey]?.color || "transparent",
-                  }}
-                  onClick={() => handleDayClick(day, index)}
-                >
-                  {day}
-                </div>
-              );
-            })}
-          </div>
-        </div>
-      ))}
     </div>
   );
 }
 
-function PlaylistContent() {
-  const [playlist, setPlaylist] = useState([]);
-  const [songValue, setSongValue] = useState("");
-  const [artistValue, setArtistValue] = useState("");
-  const [spotifyLink, setspotifyLink] = useState("");
-  const [spotifyPlaylists, setSpotifyPlaylists] = useState([]);
+  
 
-  const addToList = () => {
-    const newSong = { song: songValue, artist: artistValue };
-    setPlaylist([...playlist, newSong]);
-    setSongValue("");
-    setArtistValue("");
-  };
-
-  const deleteItem = (index) => {
-    const newPlaylist = [...playlist];
-    newPlaylist.splice(index, 1);
-    setPlaylist(newPlaylist);
-  };
-
-  const handleSpotifyLinkChange = (event) => {
-    const link = event.target.value;
-    const regex = /playlist\/([a-zA-Z0-9]+)/;
-    const match = link.match(regex);
-    if (match && match.length > 1) {
-      const playlistId = match[1];
-      setspotifyLink(`https://open.spotify.com/embed/playlist/${playlistId}`);
-    } else {
-      setspotifyLink("");
-    }
-  };
-
-  const handleSpotifyLinkKeyDown = (event) => {
-    if (event.key === "Enter") {
-      event.preventDefault();
-      event.target.value = ""; // Clear the input value
-    }
-  };
-
-  const handleArtistKeyDown = (event) => {
-    if (event.key === "Enter") {
-      event.preventDefault();
-      addToList(); // Add to playlist when Enter key is pressed in artist input
-    }
-  };
-
-  const handleSavePlaylist = () => {
-    if (spotifyLink.trim() !== "") {
-      const playlistName = prompt("Enter a name for this playlist:");
-      if (playlistName) {
-        setSpotifyPlaylists([
-          ...spotifyPlaylists,
-          { name: playlistName, id: spotifyLink },
-        ]);
-        setspotifyLink("");
+  function CalendarContent() {
+    const colors = [
+      "#FFB6C1",
+      "#FFC0CB",
+      "#DC143C",
+      "#FFF0F5",
+      "#DB7093",
+      "#FFA07A",
+      "#FA8072",
+      "#FF4500",
+      "#FFD700",
+      "#FFA500",
+      "#7FFF00",
+      "#7CFC00",
+      "#ADFF2F",
+      "#006400",
+      "#9ACD32",
+      "#40E0D0",
+      "#20B2AA",
+      "#48D1CC",
+      "#00FFFF",
+      "#5F9EA0",
+    ];
+    const [events, setEvents] = useState({});
+    const [inputValue, setInputValue] = useState("");
+    const [selectedColor, setSelectedColor] = useState(colors[0]);
+    const [selectedDate, setSelectedDate] = useState(null);
+    const [showColorOptions, setShowColorOptions] = useState(false);
+    const currentYear = new Date().getFullYear();
+    const months = [
+      "January",
+      "February",
+      "March",
+      "April",
+      "May",
+      "June",
+      "July",
+      "August",
+      "September",
+      "October",
+      "November",
+      "December",
+    ];
+  
+    useEffect(() => {
+      fetchEvents();
+    }, []);
+  
+    const fetchEvents = async () => {
+      const username = localStorage.getItem('user');
+      const response = await fetch(`http://localhost:5000/api/calendar/events/${username}`);
+      const data = await response.json();
+      const formattedEvents = data.reduce((acc, event) => {
+        acc[event.date] = { name: event.eventName, color: event.color };
+        return acc;
+      }, {});
+      setEvents(formattedEvents);
+    };
+  
+    const addEvent = async () => {
+      if (inputValue.trim() && selectedDate) {
+        const username = localStorage.getItem('user');
+        const newEvent = { user: username, date: selectedDate, eventName: inputValue, color: selectedColor };
+        const response = await fetch('http://localhost:5000/api/calendar/addEvent', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(newEvent),
+        });
+        if (response.ok) {
+          fetchEvents();
+          setInputValue('');
+          setSelectedDate(null);
+        } else {
+          console.error('Failed to add event');
+        }
       }
-    }
-  };
-
-  const handlePlaylistSelect = (id) => {
-    setspotifyLink(id);
-  };
-
-  const handleDeletePlaylist = (index) => {
-    const newPlaylists = [...spotifyPlaylists];
-    newPlaylists.splice(index, 1);
-    setSpotifyPlaylists(newPlaylists);
-  };
-
-  return (
-    <div className="tabcontent">
-      <h1 className="Title">Playlist</h1>
-      <br />
-      <a id="spotifyLink" href="" target="_blank">
-        Find Your Spotify Library
-      </a>
-      <div className="PlaylistContainer">
-        <div className="SongListContainer">
-          <h3 className="PlaylistSubHeaders">Playlist Songs</h3>
-          <div className="InputContainer">
-            <div>
-              <input
-                type="text"
-                value={songValue}
-                placeholder="Song Name"
-                onChange={(e) => setSongValue(e.target.value)}
-                id="songName"
-              />
+    };
+  
+    const removeEvent = async (dateKey) => {
+      const eventId = events[dateKey]._id;
+      const response = await fetch(`http://localhost:5000/api/calendar/deleteEvent/${eventId}`, {
+        method: 'DELETE',
+      });
+      if (response.ok) {
+        fetchEvents();
+      } else {
+        console.error('Failed to delete event');
+      }
+    };
+  
+    const getEventListByColor = () => {
+      return Object.values(events).reduce((acc, event) => {
+        const { name, color } = event;
+        if (!acc[color]) {
+          acc[color] = [];
+        }
+        acc[color].push(name);
+        return acc;
+      }, {});
+    };
+  
+    const getDaysInMonth = (monthIndex, year) => {
+      return Array.from(
+        { length: new Date(year, monthIndex + 1, 0).getDate() },
+        (_, i) => i + 1
+      );
+    };
+    const handleDayClick = (day, monthIndex) => {
+      const dateKey = `${day}-${months[monthIndex]}-${currentYear}`;
+      setSelectedDate(dateKey);
+      if (events[dateKey]) {
+        removeEvent(dateKey);
+      }
+    };
+  
+    return (
+      <div className="calendar-container">
+        <div className="controls">
+          <input
+            type="text"
+            value={inputValue}
+            onChange={(e) => setInputValue(e.target.value)}
+            placeholder="Event Name"
+          />
+          <div
+            className="color-selector"
+            onClick={() => setShowColorOptions(!showColorOptions)}
+          >
+            <div
+              className="selected-color"
+              style={{ backgroundColor: selectedColor }}
+            ></div>
+            {showColorOptions && (
+              <div className="color-options">
+                {colors.map((color) => (
+                  <div
+                    key={color}
+                    className="color-option"
+                    style={{ backgroundColor: color }}
+                    onClick={() => {
+                      setSelectedColor(color);
+                      setShowColorOptions(false);
+                    }}
+                  />
+                ))}
+              </div>
+            )}
+          </div>
+          <button onClick={addEvent}>Add Event</button>
+        </div>
+  
+        <div className="legend">
+          <h4>Color Legend:</h4>
+          {Object.entries(getEventListByColor()).map(([color, eventNames]) => (
+            <div key={color} className="legend-item">
+              <span
+                className="color-box"
+                style={{ backgroundColor: color }}
+              ></span>
+              <span className="event-names">{[...eventNames].join(", ")}</span>
             </div>
-            <div>
-              <input
-                type="text"
-                value={artistValue}
-                placeholder="Artist Name"
-                onChange={(e) => setArtistValue(e.target.value)}
-                onKeyDown={handleArtistKeyDown}
-                id="artistName"
-              />
+          ))}
+        </div>
+  
+        {months.map((month, index) => (
+          <div key={month} className="month-container">
+            <h3>{month}</h3>
+            <div className="days-grid">
+              {getDaysInMonth(index, currentYear).map((day) => {
+                const dateKey = `${day}-${month}-${currentYear}`;
+                return (
+                  <div
+                    key={day}
+                    className={`day ${events[dateKey] ? "event-day" : ""}`}
+                    style={{
+                      backgroundColor: events[dateKey]?.color || "transparent",
+                    }}
+                    onClick={() => handleDayClick(day, index)}
+                  >
+                    {day}
+                  </div>
+                );
+              })}
             </div>
           </div>
-          <button id="AddSongButton" onClick={addToList}>
-            {" "}
-            Add Song{" "}
-          </button>
-          <ul>
-            {playlist.map((item, index) => (
-              <li key={index} className="PlaylistItem">
-                {item.song} - {item.artist}
-                <span
-                  className="DeleteMessage"
-                  onClick={() => deleteItem(index)}
-                >
-                  Delete
-                </span>
-              </li>
-            ))}
-          </ul>
-        </div>
+        ))}
+      </div>
+    );
+  }
 
-        <div className="SpotifyContainer">
-          <h3 className="PlaylistSubHeaders">Spotify Playlist</h3>
-          <label>
-            {" "}
-            Enter the playlist link:
-            <input
-              type="text"
-              value={spotifyLink}
-              placeholder="Playlist Link"
-              onChange={handleSpotifyLinkChange}
-              onKeyDown={handleSpotifyLinkKeyDown} // Handle Enter key press
-            />
-            <p>
+function PlaylistContent() {
+    const [playlist, setPlaylist] = useState([]);
+    const [songValue, setSongValue] = useState("");
+    const [artistValue, setArtistValue] = useState("");
+    const [spotifyLink, setspotifyLink] = useState("");
+    const [spotifyPlaylists, setSpotifyPlaylists] = useState([]);
+  
+    useEffect(() => {
+      fetchPlaylistContent();
+    }, []);
+    
+    // const fetchGuestList = async () => {
+    //   try {
+    //     const username = localStorage.getItem("user");
+    //     const response = await fetch(
+    //       `http://localhost:5000/api/guests?username=${username}`
+    //     ); // Assumes your backend route for fetching guests is '/api/guests'
+    //     const data = await response.json();
+    //     setGuests(data);
+    //   } catch (error) {
+    //     console.error("Error fetching guest list:", error);
+    //   }
+    // };
+    const fetchPlaylistContent = async () => {
+      try {
+        const username = localStorage.getItem("user");
+        const response = await fetch(`http://localhost:5000/api/playlist/${username}`);
+        console.log("fetch:" , response);
+
+        if (response.ok) {
+          const data = await response.json();
+          console.log(data);
+          console.log('one ', data.songs);
+          console.log('two ' , data.spotifyPlaylists);
+          
+          setPlaylist(data.songs ? [data.songs] : [] );
+          setSpotifyPlaylists(data.spotifyPlaylists ? [data.spotifyPlaylists] : [] );
+          console.log('three ' , playlist);
+          console.log('four ' , spotifyPlaylists);
+        }
+        else {
+          console.error('Failed to fetch playlist information: ', response.statusText);
+        }
+      }
+      catch (error) {
+        console.error("Error fetching playlist information: ", error);
+      }
+    };
+  
+    const addSongToPlaylist = async () => {
+      try {
+        const username = localStorage.getItem("user");
+        const response = await fetch('http://localhost:5000/api/playlist/addSong', { 
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ user: username, song: songValue, artist: artistValue }),
+        });
+        
+        if (response.ok) {
+          await fetchPlaylistContent();
+          setSongValue("");
+          setArtistValue("");
+        }
+        else {
+          console.error('Failed to add song to playlist: ', response.statusText);
+        }
+      } 
+      catch (error) {
+        console.error('Error adding song to playlist: ', error);
+      }
+    };
+  
+    const deleteSongFromPlaylist = async (id) => {
+      try {
+        const response = await fetch(`http://localhost:5000/api/playlist/deleteSong/${id}`, {
+          method: 'DELETE',
+        });
+        
+        if (response.ok) {
+          await fetchPlaylistContent();
+        }
+        else {
+          console.error('Failed to delete song from playlist: ', response.statusText);
+        }
+      }
+      catch (error) {
+        console.error('Error deleting song from playlist: ', error);
+      }
+    };
+  
+    const addSpotifyPlaylist = async ({ spotifyPlaylistName }) => {
+      try {
+        const username = localStorage.getItem("user");
+        const response = await fetch('http://localhost:5000/api/playlist/addSpotify', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ user: username, url: spotifyLink, name: spotifyPlaylistName }),
+        });
+        console.log(response);
+        
+        if (response.ok) {
+          await fetchPlaylistContent();
+          setspotifyLink("");
+        } 
+        else {
+          console.error('Failed to add Spotify playlist: ', response.statusText);
+        }
+      } catch (error) {
+        console.error('Error adding Spotify playlist: ', error);
+      }
+    };
+  
+    const deleteSpotifyPlaylist = async (id) => {
+      try {
+        const response = await fetch(`http://localhost:5000/api/playlist/deleteSpotify/${id}`, {
+          method: 'DELETE',
+        });
+        
+        if (response.ok) {
+          await fetchPlaylistContent();
+        } else {
+          console.error('Failed to delete Spotify playlist: ', response.statusText);
+        }
+      } catch (error) {
+        console.error('Error deleting Spotify playlist: ', error);
+      }
+    };
+  
+    const handleSpotifyLinkChange = (event) => {
+      const link = event.target.value;
+      const regex = /playlist\/([a-zA-Z0-9]+)/;
+      const match = link.match(regex);
+      
+      if (match && match.length > 1) {
+        const playlistId = match[1];
+        setspotifyLink(`https://open.spotify.com/embed/playlist/${playlistId}`);
+      } 
+      else {
+        setspotifyLink("");
+      }
+    };
+  
+    const handleSpotifyLinkKeyDown = (event) => {
+      if (event.key === "Enter") {
+        event.preventDefault();
+        event.target.value = ""; // Clear the input value
+      }
+    };
+  
+    // const handleArtistKeyDown = (event) => {
+    //   if (event.key === "Enter") {
+    //     event.preventDefault();
+    //     addSongToPlaylist(); // Add to playlist when Enter key is pressed in artist input
+    //   }
+    // };
+  
+    const handleSavePlaylist = () => {
+      if (spotifyLink.trim() !== "") {
+        const playlistName = prompt("Enter a name for this playlist:");
+        
+        if (playlistName) {
+          // setSpotifyPlaylists([...spotifyPlaylists, { name: playlistName, id: spotifyLink }, ]);
+          // setspotifyLink("");
+          addSpotifyPlaylist(playlistName);
+        }
+      }
+    };
+  
+    const handlePlaylistSelect = (id) => {
+      setspotifyLink(id);
+    };
+  
+    const handleDeletePlaylist = (index) => {
+      const newPlaylists = [...spotifyPlaylists];
+      newPlaylists.splice(index, 1);
+      setSpotifyPlaylists(newPlaylists);
+    };
+  
+    return (
+      <div className="tabcontent">
+        <h1 className="Title">Playlist</h1>
+        <br />
+        <a id="spotifyLink" href="https://open.spotify.com/" target="_blank">
+          Find Your Spotify Library
+        </a>
+        <div className="PlaylistContainer">
+          <div className="SongListContainer">
+            <h3 className="PlaylistSubHeaders">Playlist Songs</h3>
+            <div className="InputContainer">
+              <div>
+                <input
+                  type="text"
+                  value={songValue}
+                  placeholder="Song Name"
+                  onChange={(e) => setSongValue(e.target.value)}
+                  id="songName"
+                />
+              </div>
+              <div>
+                <input
+                  type="text"
+                  value={artistValue}
+                  placeholder="Artist Name"
+                  onChange={(e) => setArtistValue(e.target.value)}
+                  id="artistName"
+                />
+              </div>
+            </div>
+            <button id="AddSongButton" onClick={addSongToPlaylist}>
               {" "}
-              Help: "https://open.spotify.com/embed/playlist/
-              <span className="helpMessage">[your-playlist-id-here]</span>
-            </p>
-          </label>
-          <button onClick={handleSavePlaylist}>Save Playlist</button>
-          <ul>
-            {spotifyPlaylists.map((playlist, index) => (
-              <li key={index} id="SpotifyList">
-                <span id="PlaylistName">{playlist.name}</span>
-                <span id="PlaylistButtons">
+              Add Song{" "}
+            </button>
+            <ul>
+              {playlist.map((item, index) => (
+                <li key={playlist._id} className="PlaylistItem">
+                  {item.song} - {item.artist}
                   <span
-                    className="PlayButton"
-                    onClick={() => handlePlaylistSelect(playlist.id)}
-                  >
-                    Play
-                  </span>{" "}
-                  <span
-                    className="DeleteButton"
-                    onClick={() => handleDeletePlaylist(index)}
-                  >
-                    Delete
+                    className="DeleteMessage"
+                    onClick={() => deleteSongFromPlaylist(playlist._id)}> Delete </span>
+                </li>
+              ))}
+            </ul>
+          </div>
+  
+          <div className="SpotifyContainer">
+            <h3 className="PlaylistSubHeaders">Spotify Playlist</h3>
+            <label>
+              {" "}
+              Enter the playlist link:
+              <input
+                type="text"
+                value={spotifyLink}
+                placeholder="Playlist Link"
+                onChange={handleSpotifyLinkChange}
+                onKeyDown={handleSpotifyLinkKeyDown} // Handle Enter key press
+              />
+              <p>
+                {" "}
+                Help: "https://open.spotify.com/embed/playlist/
+                <span className="helpMessage">[your-playlist-url-here]</span>
+              </p>
+            </label>
+            <button onClick={handleSavePlaylist}>Save Playlist</button>
+            <ul>
+              {spotifyPlaylists.map((playlist, index) => (
+                <li key={index} id="SpotifyList">
+                  <span id="PlaylistName">{playlist.name}</span>
+                  <span id="PlaylistButtons">
+                    <span
+                      className="PlayButton"
+                      onClick={() => handlePlaylistSelect(playlist._id)}
+                    >
+                      Play
+                    </span>{" "}
+                    <span
+                      className="DeleteButton"
+                      onClick={() => deleteSpotifyPlaylist(playlist._id)} 
+                    >
+                      Delete
+                    </span>
                   </span>
-                </span>
-              </li>
-            ))}
-          </ul>
-          {spotifyLink && (
-            <iframe
-              style={{ borderRadius: "12px" }}
-              src={spotifyLink}
-              width="100%"
-              height="352"
-              frameBorder="0"
-              allowFullScreen=""
-              allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
-              loading="lazy"
-            ></iframe>
-          )}
+                </li>
+              ))}
+            </ul>
+            {spotifyLink && (
+              <iframe
+                style={{ borderRadius: "12px" }}
+                src={spotifyLink}
+                width="100%"
+                height="352"
+                frameBorder="0"
+                allowFullScreen=""
+                allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
+                loading="lazy"
+              ></iframe>
+            )}
+          </div>
         </div>
       </div>
-    </div>
-  );
+    );
 }
 
 function MoodBoardContent() {
   const [urlLink, setUrlLink] = useState("");
   const [photos, setPhotos] = useState([]);
 
+  useEffect(() => { 
+    fetchMoodBoardData();
+  }, [] );
+  
+  const fetchMoodBoardData = async () => {
+    try {
+      const username = localStorage.getItem("user");
+      const response = await fetch(`http://localhost:5000/api/moodboard/${username}`);
+      
+      if (response.ok) {
+        const data = await response.json();
+        setPhotos(data ? [data] : []);
+      } 
+      else {
+        console.error("Failed to fetch moodboard information:", response.statusText);
+      }
+    }
+    catch(error) {
+      console.error("Error fetching moodboard information: ", error);
+    }
+  };
+
   const handleInputChange = (event) => {
     setUrlLink(event.target.value);
   };
 
-  const handleAddPhoto = () => {
-    if (urlLink.trim() !== "") {
-      setPhotos([...photos, urlLink]);
-      setUrlLink("");
+  const handleAddPhoto = async () => {
+    try {
+      const username = localStorage.getItem("user");
+      const response = await fetch('http://localhost:5000/api/moodboard/add', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', },
+        body: JSON.stringify({ user: username, urlLink: urlLink }),
+      });
+      if (response.ok) {
+        setPhotos([...photos, urlLink]);
+        setUrlLink('');
+      }
+      else {
+        console.error('Failed to add photo: ', response.statusText);
+      }
+    }
+    catch(error) {
+      console.error('Error adding photo: ', error);
     }
   };
+
+  const handleDeletePhoto = async (id) => {
+    try {
+      const response = await fetch(`http://localhost:5000/api/moodboard/delete/${id}`, {
+        method: 'DELETE',
+      });
+
+      if (response.ok) {
+        const updatedPhotos = photos.filter(photo => photo._id !== id);
+        setPhotos(updatedPhotos);
+      }
+      else {
+        console.error('Failed to delete photo: ', response.statusText);
+      }
+    }
+    catch(error) {
+        console.error('Error deleting photo: ', error);
+    }
+  }
+
   return (
     <div className="tabcontent">
       <h2 className="Title">Mood Board</h2>
@@ -1176,12 +1549,15 @@ function MoodBoardContent() {
       </div>
       <div className="ContentContainer">
         {photos.map((photo, index) => (
-          <img key={index} src={photo} alt={`Photo ${index}`} />
+          <div key={photo._id} className="PhotoContainer">
+            <img src={photo.urlLink} alt={`Photo ${index}`} />
+            <button onClick={() => handleDeletePhoto(photo._id)}>Delete</button>
+          </div>
         ))}
       </div>
     </div>
   );
-}
+};
 
 function Content({ activeTab }) {
   const [contentVisible, setContentVisible] = useState(false);

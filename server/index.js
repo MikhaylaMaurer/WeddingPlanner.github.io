@@ -6,6 +6,10 @@ const guestRoutes = require('./routes/Guest');
 const checklistRoutes = require('./routes/Check');
 const vendorRoutes = require('./routes/Vendor');
 const dayOfRoutes = require('./routes/DayOf');
+const budgetRoutes = require('./routes/Budget');
+const calendarRoutes = require('./routes/Calendar');
+const moodboardRoutes = require('./routes/Moodboard');
+const playlistRoutes = require('./routes/Playlist');
 const cors = require('cors');
 
 const app = express();
@@ -27,6 +31,14 @@ app.use('/api/checklist', checklistRoutes);
 app.use('/api/vendors', vendorRoutes);
 
 app.use('/api/dayof', dayOfRoutes);
+
+app.use('/api/budget', budgetRoutes);
+
+app.use('/api/calendar', calendarRoutes);
+
+app.use('/api/moodboard', moodboardRoutes);
+
+app.use('/api/playlist', playlistRoutes);
 
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
