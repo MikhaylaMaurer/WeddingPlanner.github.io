@@ -9,11 +9,15 @@ const budgetItemSchema = new mongoose.Schema({
 const budgetCategorySchema = new mongoose.Schema({
   title: String,
   items: [budgetItemSchema],
+  totalBudgeted: Number,
+  totalActual: Number,
 });
 
 const budgetSchema = new mongoose.Schema({
   user: String,
   budgetCategories: [budgetCategorySchema],
+  totalBudgeted: Number,
+  totalActual: Number,
 });
 
 const Budget = mongoose.model('Budget', budgetSchema);

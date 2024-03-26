@@ -24,4 +24,23 @@ router.post("/", async (req, res) => {
   }
 });
 
+// Fetch vendor information for a specific user
+router.get("/:user", async (req, res) => {
+  try {
+    const { user } = req.params;
+
+    // Find vendor information for the specified user
+    const vendorInfo = await Vendor.findOne({ user });
+
+    if (!vendorInfo) {
+      return res.status(404).json({ message: "Vendor information not found" });
+    }
+
+    res.status(200).json({ vendors: vendorInfo.vendors });
+  } catch (error) {
+    console.error("Error fetching vendor information:", error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+});
+
 module.exports = router;

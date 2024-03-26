@@ -10,6 +10,7 @@ const budgetRoutes = require('./routes/Budget');
 const calendarRoutes = require('./routes/Calendar');
 const moodboardRoutes = require('./routes/Moodboard');
 const playlistRoutes = require('./routes/Playlist');
+const seatingRoutes = require('./routes/Seating');
 const cors = require('cors');
 
 const app = express();
@@ -39,6 +40,7 @@ app.use('/api/calendar', calendarRoutes);
 app.use('/api/moodboard', moodboardRoutes);
 
 app.use('/api/playlist', playlistRoutes);
+app.use('/api/seating', seatingRoutes);
 
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {

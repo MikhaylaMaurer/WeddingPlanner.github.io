@@ -880,3 +880,48 @@ body {
 .DeleteButton:hover {
   color: red;
 }
+
+
+/* Shay added for Seating Plan */
+.guestNamesTable {
+  width: 90%; /* Reduce the width of the guest names table */
+  border-collapse: collapse;
+  margin: 0 auto; /* Center the table */
+}
+
+.guestNamesTable th,
+.guestNamesTable td {
+  padding: 2px; /* Reduce padding to make cells smaller */
+  border: 1px solid black; /* Add border to cells */
+}
+
+.guestNameInput {
+  width: calc(100% - 6px); /* Adjust the width of the guest name input */
+}
+
+.tableAndChairsContainer {
+  display: inline-block;
+  margin: 10px;
+  width: 45%; /* Set width to ensure two components per row */
+  vertical-align: top;
+  text-align: center;
+}
+
+.imageContainer {
+  display: inline-block;
+  width: 45%; /* Adjust the width of the image container */
+  vertical-align: middle;
+}
+
+.imageProperties {
+  max-width: 100%;
+  height: auto;
+}
+
+.guestNamesContainer {
+  display: inline-block;
+  width: 45%; /* Adjust the width of the guest names container */
+  vertical-align: middle;
+  overflow-x: auto; /* Add horizontal scroll if necessary */
+}
+/* End of Shay's seating plan */
