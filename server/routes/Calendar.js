@@ -1,46 +1,43 @@
+// routes/CalendarEvents.js
 const express = require('express');
 const router = express.Router();
-const Budget = require('../models/Budget');
+const CalendarEvent = require('../models/Calendar');
 
-// Get budget data for a user
-router.get('/:user', async (req, res) => {
+// Route to add a calendar event
+router.post('/addEvent', async (req, res) => {
+  const { user, date, eventName, color } = req.body;
+  const newEvent = new CalendarEvent({ user, date, eventName, color });
   try {
-    const budget = await Budget.findOne({ user: req.params.user });
-    res.json(budget);
+    await newEvent.save();
+    res.status(201).json({ message: 'Event added successfully', event: newEvent });
   } catch (error) {
-    res.status(500).json({ message: 'Error fetching budget data', error });
+    console.error('Error adding calendar event:', error);
+    res.status(500).json({ message: 'Failed to add event' });
   }
 });
 
-// Save or update budget data for a user
-router.post('/', async (req, res) => {
+// Route to fetch calendar events for a user
+router.get('/events/:user', async (req, res) => {
+  const { user } = req.params;
   try {
-    const { user, budgetCategories } = req.body;
-
-    const updatedCategories = budgetCategories.map((category) => {
-      const updatedItems = category.items.map((item) => ({
-        ...item,
-        budgeted: parseFloat(item.budgeted) || 0,
-        actual: parseFloat(item.actual) || 0,
-      }));
-      const totalBudgeted = updatedItems.reduce((sum, item) => sum + item.budgeted, 0);
-      const totalActual = updatedItems.reduce((sum, item) => sum + item.actual, 0);
-      return { ...category, items: updatedItems, totalBudgeted, totalActual };
-    });
-
-    const totalBudgeted = updatedCategories.reduce((sum, category) => sum + category.totalBudgeted, 0);
-    const totalActual = updatedCategories.reduce((sum, category) => sum + category.totalActual, 0);
-
-    const budget = await Budget.findOneAndUpdate(
-      { user },
-      { user, budgetCategories: updatedCategories, totalBudgeted, totalActual },
-      { new: true, upsert: true }
-    );
-    res.status(201).json(budget);
+    const events = await CalendarEvent.find({ user });
+    res.status(200).json(events);
   } catch (error) {
-    res.status(500).json({ message: 'Error saving budget data', error });
+    console.error('Error fetching calendar events:', error);
+    res.status(500).json({ message: 'Internal server error' });
   }
 });
 
+// Route to delete a calendar event
+router.delete('/deleteEvent/:id', async (req, res) => {
+  const { id } = req.params;
+  try {
+    await CalendarEvent.findByIdAndDelete(id);
+    res.status(200).json({ message: 'Event deleted successfully' });
+  } catch (error) {
+    console.error('Error deleting calendar event:', error);
+    res.status(500).json({ message: 'Failed to delete event' });
+  }
+});
 
 module.exports = router;
