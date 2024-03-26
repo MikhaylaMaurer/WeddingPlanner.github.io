@@ -164,7 +164,7 @@ function ChecklistContent() {
     try {
       const username = localStorage.getItem("user");
       const response = await fetch(
-        `http://localhost:5000/api/checklist/${username}`
+        `http://localhost:5002/api/checklist/${username}`
       );
       if (response.ok) {
         const data = await response.json();
@@ -191,7 +191,7 @@ function ChecklistContent() {
       const username = localStorage.getItem("user");
       console.log("user: ", username);
       const response = await fetch(
-        `http://localhost:5000/api/checklist/${username}`,
+        `http://localhost:5002/api/checklist/${username}`,
         {
           method: "PUT",
           headers: {
@@ -255,7 +255,7 @@ function GuestlistContent() {
     try {
       const username = localStorage.getItem("user");
       const response = await fetch(
-        `http://localhost:5000/api/guests?username=${username}`
+        `http://localhost:5002/api/guests?username=${username}`
       ); // Assumes your backend route for fetching guests is '/api/guests'
       const data = await response.json();
       setGuests(data);
@@ -296,7 +296,7 @@ function GuestlistContent() {
         rsvpStatus: inputRSVP ? "RSVP'd" : "Not RSVP'd",
       };
       try {
-        const response = await fetch("http://localhost:5000/api/addGuest", {
+        const response = await fetch("http://localhost:5002/api/addGuest", {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
@@ -322,7 +322,7 @@ function GuestlistContent() {
   const handleRemoveGuest = async (id) => {
     try {
       const response = await fetch(
-        `http://localhost:5000/api/removeGuest/${id}`,
+        `http://localhost:5002/api/removeGuest/${id}`,
         {
           method: "DELETE",
         }
@@ -351,7 +351,7 @@ function GuestlistContent() {
       updatedGuests.rsvpStatus = inputRSVP ? "RSVP'd" : "Not RSVP'd";
       try {
         const response = await fetch(
-          `http://localhost:5000/api/updateGuest/${updatedGuests._id}`,
+          `http://localhost:5002/api/updateGuest/${updatedGuests._id}`,
           {
             method: "PUT",
             headers: {
@@ -455,7 +455,7 @@ function SeatingContent() {
       try {
         const username = localStorage.getItem("user");
         const response = await fetch(
-          `http://localhost:5000/api/seating/${username}`
+          `http://localhost:5002/api/seating/${username}`
         );
         console.log(response);
         if (response.ok) {
@@ -496,7 +496,7 @@ function SeatingContent() {
         try {
           const username = localStorage.getItem("user");
           const response = await fetch(
-            "http://localhost:5000/api/seating/add",
+            "http://localhost:5002/api/seating/add",
             {
               method: "POST",
               headers: { "Content-Type": "application/json" },
@@ -613,7 +613,7 @@ function DayOfContent() {
     try {
       const username = localStorage.getItem("user");
       const response = await fetch(
-        `http://localhost:5000/api/dayof/events?username=${username}`
+        `http://localhost:5002/api/dayof/events?username=${username}`
       ); // Fetch events from backend
       const data = await response.json();
       setEvents(data); // Set events state with fetched events
@@ -629,7 +629,7 @@ function DayOfContent() {
       const requestBody = { user: username, ...newEvent }; // Construct the request body
       console.log("Request Body:", requestBody);
       console.log(username);
-      const response = await fetch("http://localhost:5000/api/dayof/addEvent", {
+      const response = await fetch("http://localhost:5002/api/dayof/addEvent", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -662,7 +662,7 @@ function DayOfContent() {
   const removeEvent = async (indexToRemove) => {
     try {
       const response = await fetch(
-        `http://localhost:5000/api/dayof/removeEvent/${indexToRemove}`,
+        `http://localhost:5002/api/dayof/removeEvent/${indexToRemove}`,
         {
           method: "DELETE",
         }
@@ -738,7 +738,7 @@ function VendorContent() {
     try {
       const username = localStorage.getItem("user");
       const response = await fetch(
-        `http://localhost:5000/api/vendors/${username}`
+        `http://localhost:5002/api/vendors/${username}`
       );
       if (response.ok) {
         const data = await response.json();
@@ -783,7 +783,7 @@ function VendorContent() {
       });
       console.log("Vendor Data before sending:", vendorData);
 
-      const response = await fetch("http://localhost:5000/api/vendors", {
+      const response = await fetch("http://localhost:5002/api/vendors", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -946,7 +946,7 @@ function BudgetContent() {
     try {
       const username = localStorage.getItem("user");
       const response = await fetch(
-        `http://localhost:5000/api/budget/${username}`
+        `http://localhost:5002/api/budget/${username}`
       );
       if (response.ok) {
         const data = await response.json();
@@ -964,7 +964,7 @@ function BudgetContent() {
   const handleSave = async () => {
     try {
       const username = localStorage.getItem("user");
-      const response = await fetch("http://localhost:5000/api/budget", {
+      const response = await fetch("http://localhost:5002/api/budget", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -1130,7 +1130,7 @@ function CalendarContent() {
 
   const fetchEvents = async () => {
     const username = localStorage.getItem("user");
-    const response = await fetch(`http://localhost:5000/api/calendar/events/${username}`);
+    const response = await fetch(`http://localhost:5002/api/calendar/events/${username}`);
     const data = await response.json();
     const formattedEvents = data.reduce((acc, event) => {
       // Assuming each event has a unique date, if not, consider using a different structure
@@ -1144,7 +1144,7 @@ function CalendarContent() {
     if (events[dateKey] && events[dateKey]._id) {
       const eventId = events[dateKey]._id;
       const response = await fetch(
-        `http://localhost:5000/api/calendar/deleteEvent/${eventId}`,
+        `http://localhost:5002/api/calendar/deleteEvent/${eventId}`,
         { method: "DELETE" }
       );
       if (response.ok) {
@@ -1160,7 +1160,7 @@ function CalendarContent() {
   // const fetchEvents = async () => {
   //   const username = localStorage.getItem("user");
   //   const response = await fetch(
-  //     `http://localhost:5000/api/calendar/events/${username}`
+  //     `http://localhost:5002/api/calendar/events/${username}`
   //   );
   //   const data = await response.json();
   //   const formattedEvents = data.reduce((acc, event) => {
@@ -1180,7 +1180,7 @@ function CalendarContent() {
         color: selectedColor,
       };
       const response = await fetch(
-        "http://localhost:5000/api/calendar/addEvent",
+        "http://localhost:5002/api/calendar/addEvent",
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -1309,7 +1309,7 @@ function PlaylistContent() {
     try {
       const username = localStorage.getItem("user");
       const response = await fetch(
-        `http://localhost:5000/api/playlist/${username}`
+        `http://localhost:5002/api/playlist/${username}`
       );
 
       if (response.ok) {
@@ -1335,7 +1335,7 @@ function PlaylistContent() {
     try {
       const username = localStorage.getItem("user");
       const response = await fetch(
-        "http://localhost:5000/api/playlist/addSong",
+        "http://localhost:5002/api/playlist/addSong",
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -1364,7 +1364,7 @@ function PlaylistContent() {
     const username = localStorage.getItem("user");
     try {
       const response = await fetch(
-        `http://localhost:5000/api/playlist/deleteSong/${username}/${id}`,
+        `http://localhost:5002/api/playlist/deleteSong/${username}/${id}`,
         { method: "DELETE" }
       );
   
@@ -1384,7 +1384,7 @@ function PlaylistContent() {
     const username = localStorage.getItem("user");
   
     try {
-      const response = await fetch("http://localhost:5000/api/playlist/addSpotify", {
+      const response = await fetch("http://localhost:5002/api/playlist/addSpotify", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -1567,7 +1567,7 @@ function MoodBoardContent() {
     try {
       const username = localStorage.getItem("user");
       const response = await fetch(
-        `http://localhost:5000/api/moodboard/${username}`
+        `http://localhost:5002/api/moodboard/${username}`
       );
 
       if (response.ok) {
@@ -1591,7 +1591,7 @@ function MoodBoardContent() {
   const handleAddPhoto = async () => {
     try {
       const username = localStorage.getItem("user");
-      const response = await fetch("http://localhost:5000/api/moodboard/add", {
+      const response = await fetch("http://localhost:5002/api/moodboard/add", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ user: username, urlLink: urlLink }),
@@ -1611,7 +1611,7 @@ function MoodBoardContent() {
   const handleDeletePhoto = async (id) => {
     try {
       const response = await fetch(
-        `http://localhost:5000/api/moodboard/delete/${id}`,
+        `http://localhost:5002/api/moodboard/delete/${id}`,
         {
           method: "DELETE",
         }
